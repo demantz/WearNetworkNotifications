@@ -1,0 +1,25 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          package="com.mantz_it.wearnetworknotifications">
+    <uses-feature android:name="android.hardware.type.watch"/>
+    <uses-permission android:name="android.permission.VIBRATE" />
+    <application android:allowBackup="true"
+                 android:label="@string/app_name"
+                 android:icon="@drawable/ic_launcher"
+                 android:theme="@android:style/Theme.DeviceDefault">
+        <activity android:name=".StartActivity"
+                  android:label="Network Notifications"
+                  android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <service android:name=".WatchWearableListenerService">
+            <intent-filter>
+                <action android:name="com.google.android.gms.wearable.BIND_LISTENER" />
+            </intent-filter>
+        </service>
+        <service android:name=".NetworkNotificationService" />
+    </application>
+
+</manifest>

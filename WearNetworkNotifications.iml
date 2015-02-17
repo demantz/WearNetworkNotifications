@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<module external.linked.project.path="/media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications" external.root.project.path="$MODULE_DIR$" external.system.id="GRADLE" type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="java-gradle" name="Java-Gradle">
+      <configuration>
+        <option name="BUILD_FOLDER_PATH" value="/media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/build" />
+      </configuration>
+    </facet>
+  </component>
+  <component name="NewModuleRootManager" inherit-compiler-output="false">
+    <output url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/build/classes/main" />
+    <output-test url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/build/classes/test" />
+    <exclude-output />
+    <content url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications">
+      <excludeFolder url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/.gradle" />
+    </content>
+    <orderEntry type="jdk" jdkName="1.8" jdkType="JavaSDK" />
+    <orderEntry type="sourceFolder" forTests="false" />
+  </component>
+</module>
+
