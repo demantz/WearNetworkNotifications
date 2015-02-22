@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="@string/pref_notifications_category"
+        android:title="@string/pref_notifications_category_title">
+        <SwitchPreference
+            android:key="@string/pref_showNotifications"
+            android:title="@string/pref_showNotifications_title"
+            android:summaryOn="@string/pref_showNotifications_summ_on"
+            android:summaryOff="@string/pref_showNotifications_summ_off"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_vibration"
+            android:title="@string/pref_vibration_title"
+            android:summaryOn="@string/pref_vibration_summ_on"
+            android:summaryOff="@string/pref_vibration_summ_off"
+            android:defaultValue="true"/>
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_wifiOffline"
+            android:title="@string/pref_wifiOffline_title"
+            android:summaryOn="@string/pref_wifiOffline_summ_on"
+            android:summaryOff="@string/pref_wifiOffline_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_wifiCellular"
+            android:title="@string/pref_wifiCellular_title"
+            android:summaryOn="@string/pref_wifiCellular_summ_on"
+            android:summaryOff="@string/pref_wifiCellular_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_cellularOffline"
+            android:title="@string/pref_cellularOffline_title"
+            android:summaryOn="@string/pref_cellularOffline_summ_on"
+            android:summaryOff="@string/pref_cellularOffline_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_cellularWifi"
+            android:title="@string/pref_cellularWifi_title"
+            android:summaryOn="@string/pref_cellularWifi_summ_on"
+            android:summaryOff="@string/pref_cellularWifi_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_offlineWifi"
+            android:title="@string/pref_offlineWifi_title"
+            android:summaryOn="@string/pref_offlineWifi_summ_on"
+            android:summaryOff="@string/pref_offlineWifi_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_offlineCellular"
+            android:title="@string/pref_offlineCellular_title"
+            android:summaryOn="@string/pref_offlineCellular_summ_on"
+            android:summaryOff="@string/pref_offlineCellular_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_wearableOffline"
+            android:title="@string/pref_wearableOffline_title"
+            android:summaryOn="@string/pref_wearableOffline_summ_on"
+            android:summaryOff="@string/pref_wearableOffline_summ_off"
+            android:defaultValue="true" />
+        <CheckBoxPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_wearableOnline"
+            android:title="@string/pref_wearableOnline_title"
+            android:summaryOn="@string/pref_wearableOnline_summ_on"
+            android:summaryOff="@string/pref_wearableOnline_summ_off"
+            android:defaultValue="true" />
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:title="@string/pref_view_category_title">
+        <SwitchPreference
+            android:key="@string/pref_showNetworkName"
+            android:title="@string/pref_showNetworkName_title"
+            android:summaryOn="@string/pref_showNetworkName_summ_on"
+            android:summaryOff="@string/pref_showNetworkName_summ_off"
+            android:defaultValue="true" />
+        <SwitchPreference
+            android:key="@string/pref_showSignalStrength"
+            android:title="@string/pref_showSignalStrength_title"
+            android:summaryOn="@string/pref_showSignalStrength_summ_on"
+            android:summaryOff="@string/pref_showSignalStrength_summ_off"
+            android:defaultValue="true" />
+        <ListPreference
+            android:key="@string/pref_wifiSignalStrengthUnit"
+            android:dependency="@string/pref_showSignalStrength"
+            android:title="@string/pref_wifiSignalStrengthUnit_title"
+            android:dialogTitle="@string/pref_wifiSignalStrengthUnit_title"
+            android:entries="@array/pref_wifiSignalStrengthUnit_entries"
+            android:entryValues="@array/pref_wifiSignalStrengthUnit_values"
+            android:defaultValue="@string/pref_wifiSignalStrengthUnit_default" />
+        <ListPreference
+            android:key="@string/pref_cellularSignalStrengthUnit"
+            android:dependency="@string/pref_showSignalStrength"
+            android:title="@string/pref_cellularSignalStrengthUnit_title"
+            android:dialogTitle="@string/pref_cellularSignalStrengthUnit_title"
+            android:entries="@array/pref_cellularSignalStrengthUnit_entries"
+            android:entryValues="@array/pref_cellularSignalStrengthUnit_values"
+            android:defaultValue="@string/pref_cellularSignalStrengthUnit_default" />
+    </PreferenceCategory>
+</PreferenceScreen>

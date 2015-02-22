@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item android:id="@+id/action_sendTestNotification"
+          android:title="@string/action_sendTestNotification"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_showNetworkInformation"
+          android:title="@string/action_showNetworkInformation"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_showHandheldLog"
+          android:title="@string/action_showHandheldLog"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_showWearableLog"
+          android:title="@string/action_showWearableLog"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+    <item android:id="@+id/action_donate"
+          android:title="@string/action_donate"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+</menu>

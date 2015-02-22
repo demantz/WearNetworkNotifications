@@ -1,6 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="com.mantz_it.wearnetworknotifications">
 
+    <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.READ_PHONE_STATE" />
     <uses-permission android:name="android.permission.READ_PRECISE_PHONE_STATE" />
@@ -9,15 +10,12 @@
 
     <application android:allowBackup="true"
                  android:label="@string/app_name"
-                 android:icon="@drawable/ic_launcher"
-                 android:theme="@style/AppTheme">
-
-        <activity android:name=".TestActivity"
-                  android:label="WNN TestApp"
+                 android:icon="@drawable/ic_launcher">
+        <activity android:name=".SettingsActivity"
+                  android:label="@string/app_label"
                   android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

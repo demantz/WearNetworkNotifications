@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">WearNetworkNotifications</string>
+    <string name="app_name" translatable="false">WearNetworkNotifications</string>
+    <string name="app_label">Network Notifications</string>
 </resources>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="pref_cellularSignalStrengthUnit_entries">
+        <item>Percent</item>
+        <item>dBm</item>
+        <item>ASU Level</item>
+    </string-array>
+    <string-array translatable="false" name="pref_cellularSignalStrengthUnit_values">
+        <item>0</item>
+        <item>1</item>
+        <item>2</item>
+    </string-array>
+    <string-array name="pref_wifiSignalStrengthUnit_entries">
+        <item>Percent</item>
+        <item>RSSI</item>
+    </string-array>
+    <string-array translatable="false" name="pref_wifiSignalStrengthUnit_values">
+        <item>0</item>
+        <item>2</item>
+    </string-array>
+</resources>

@@ -7,7 +7,7 @@
                  android:icon="@drawable/ic_launcher"
                  android:theme="@android:style/Theme.DeviceDefault">
         <activity android:name=".StartActivity"
-                  android:label="Network Notifications"
+                  android:label="@string/app_label"
                   android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

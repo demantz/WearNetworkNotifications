@@ -1,8 +1,10 @@
 package com.mantz_it.wearnetworknotifications;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -80,6 +82,46 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		}
 	}
 
+	public static void updateSharedPreferences(GoogleApiClient googleApiClient, Context context,
+											   SharedPreferences sharedPreferences) {
+		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.SHARED_PREFERENCES);
+		DataMap dataMap = putDataMapReq.getDataMap();
+
+		String key = context.getString(R.string.pref_showNotifications);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_vibration);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_wearableOffline);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_wearableOnline);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_showNetworkName);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_showSignalStrength);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_cellularSignalStrengthUnit);
+		dataMap.putString(key, sharedPreferences.getString(key, "0"));
+
+		key = context.getString(R.string.pref_wifiSignalStrengthUnit);
+		dataMap.putString(key, sharedPreferences.getString(key, "0"));
+
+		// also add a timestamp:
+		dataMap.putLong(CommonKeys.TIMESTAMP, System.currentTimeMillis());
+
+		PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+		PendingResult<DataApi.DataItemResult> pendingResult =
+				Wearable.DataApi.putDataItem(googleApiClient, putDataReq);
+
+		// also send fresh connection data:
+		updateConnectionData(googleApiClient, context);
+	}
+
 	public static void updateConnectionData(GoogleApiClient googleApiClient, Context context) {
 		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.CONNECTION_DATA);
 
@@ -134,4 +176,31 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		return data;
 	}
 
+	@Override
+	public void onPeerConnected(Node peer) {
+		Log.d(LOGTAG, "onPeerConnected: update preferences...");
+
+		// create and connect the googleApiClient:
+		GoogleApiClient googleApiClient = WearableApiHelper
+				.createAndConnectGoogleApiClient(PhoneWearableListenerService.this, 1000);
+		if(googleApiClient == null) {
+			Log.e(LOGTAG, "onPeerConnected: Can't connect the google api client! stop.");
+			return;
+		}
+
+		// Enumerate nodes to find wearable node:
+		Node wearableNode = WearableApiHelper.getOpponentNode(googleApiClient, 1000);
+		if(wearableNode == null) {
+			Log.e(LOGTAG, "onPeerConnected: Can't get the wearable node! stop.");
+			googleApiClient.disconnect();
+			return;
+		}
+
+		// update the preferences:
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		updateSharedPreferences(googleApiClient, PhoneWearableListenerService.this, preferences);
+
+		// disconnect the api client:
+		googleApiClient.disconnect();
+	}
 }

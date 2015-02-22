@@ -17,15 +17,13 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyManager;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.List;
 
@@ -61,7 +59,7 @@ public class TestActivity extends Activity {
 	}
 
 	public void bt_loadEventsClicked(View view) {
-		loadNetworkEventFile();
+		loadLog();
 	}
 
 	public void bt_deleteEventsClicked(View view) {
@@ -236,32 +234,26 @@ public class TestActivity extends Activity {
 		}
 	}
 
-	public void loadNetworkEventFile() {
+	public void loadLog() {
+		// Read the log:
+		StringBuilder log = new StringBuilder();
 		try {
-			File file = new File(getFilesDir(), "NetworkEvents.txt");
-			System.out.println("FILE: " + file.getAbsolutePath());
-			InputStream inputStream = new FileInputStream(file);
+			Process process = Runtime.getRuntime().exec("logcat -d");
+			BufferedReader bufferedReader = new BufferedReader(
+					new InputStreamReader(process.getInputStream()));
 
-			if ( inputStream != null ) {
-				InputStreamReader inputStreamReader = new InputStreamReader(inputStream);
-				BufferedReader bufferedReader = new BufferedReader(inputStreamReader);
-				String receiveString = "";
-				StringBuilder stringBuilder = new StringBuilder();
-
-				while ( (receiveString = bufferedReader.readLine()) != null ) {
-					stringBuilder.append(receiveString + "\n");
-				}
-
-				inputStream.close();
-				tv_output.setText(stringBuilder.toString());
-				int scrollAmount = tv_output.getLayout().getLineTop(tv_output.getLineCount()) - tv_output.getHeight();
-				tv_output.scrollTo(0, scrollAmount);
+			String line = "";
+			String newline = System.getProperty("line.separator");
+			while ((line = bufferedReader.readLine()) != null) {
+				log.append(line);
+				log.append(newline);
 			}
-		}
-		catch (FileNotFoundException e) {
-			System.out.println("File not found: " + e.toString());
+			tv_output.setText(log);
+			int scrollAmount = tv_output.getLayout().getLineTop(tv_output.getLineCount()) - tv_output.getHeight();
+			tv_output.scrollTo(0, scrollAmount);
 		} catch (IOException e) {
-			System.out.println("Can not read file: " + e.toString());
+			Log.e("TestActivity", "loadLog: Couldn't read log: " + e.getMessage());
+			return;
 		}
 	}
 }

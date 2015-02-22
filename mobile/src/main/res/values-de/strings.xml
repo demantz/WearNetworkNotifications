@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+
+    <string name="action_donate">Spenden</string>
+    <string name="action_showHandheldLog">Zeige Log des Telefons</string>
+    <string name="action_showWearableLog">Zeige Log der Uhr</string>
+    <string name="googleApiClient_not_connected">Der Google API Client ist nicht verbunden!</string>
+    <string name="wearable_node_not_connected">Die Uhr ist nicht verbunden!</string>
+    <string name="loading">Laden</string>
+    <string name="querying_wearable_for_log">Uhr wird nach der Logdatai abgefragt...</string>
+    <string name="failed_to_query_wearable_for_log">Abfragen der Logdatei von der Uhr fehlgeschlagen: </string>
+    <string name="handheld_log">Log des Telefons</string>
+    <string name="share">Teilen</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="wearable_log">Log der Uhr</string>
+    <string name="chooseMailApp">Wählen sie eine Email App zum Versenden der Logdatei</string>
+    <string name="action_sendTestNotification">Sende Testbenachrichtigung</string>
+    <string name="action_showNetworkInformation">Zeige Netzwerkinformationen</string>
+    <string name="networkInformation">Netzwerkinformationen</string>
+    <string name="ok">Ok</string>
+    <string name="pref_view_category_title">Anzeige</string>
+</resources>

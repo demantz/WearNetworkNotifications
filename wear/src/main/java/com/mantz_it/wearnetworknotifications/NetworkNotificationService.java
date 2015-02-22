@@ -8,6 +8,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
@@ -16,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
@@ -44,11 +46,13 @@ public class NetworkNotificationService extends Service {
 	private static Paint paint = new Paint();						// Will be used to draw the current icon on the large bitmap
 	private BroadcastReceiver wakeUpBroadcastReceiver;
 	private boolean connected = true;	// true if we have a connection to the phone
+	private SharedPreferences sharedPreferences;
 
 	@Override
 	public void onCreate() {
 		super.onCreate();
 		Log.d(LOGTAG, "onCreate");
+		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 		wakeUpBroadcastReceiver = new BroadcastReceiver(){
 			private long lastUpdateRequestTimestamp = 0;
 			@Override
@@ -147,21 +151,16 @@ public class NetworkNotificationService extends Service {
 		} else if(intent.getAction().equals(ACTION_NOW_ONLINE)) {
 			connected = true;
 		}
-		createNotification(this, data, connected, true);
+		createNotification(this, data, connected, sharedPreferences);
 
 		return START_STICKY;
 	}
 
-	public static void createNotification(Context context, Bundle data, boolean connected, boolean vibrate) {
-//		long currentTime = System.currentTimeMillis();
-//		if(currentTime - lastNotificatonTimestamp < 5000) {
-//			Log.d(LOGTAG, "createNotification: Last notification was less than five second ago!");
-//			return;
-//		}
-//		lastNotificatonTimestamp = currentTime;
+	public static void createNotification(Context context, Bundle data, boolean connected, SharedPreferences preferences) {
+		boolean vibrate = preferences.getBoolean(context.getString(R.string.pref_vibration), true);
 
 		if(data != null)
-			updateNotification(context, data, vibrate);
+			updateNotification(context, data, vibrate, preferences);
 		else {
 			int iconRes = connected ? R.drawable.ic_launcher : R.drawable.offline;
 			String title = connected ? "loading..." : "offline";
@@ -195,25 +194,54 @@ public class NetworkNotificationService extends Service {
 		}
 	}
 
-	public static void updateNotification(Context context, Bundle data, boolean vibrate) {
+	public static void updateNotification(Context context, Bundle data, boolean vibrate, SharedPreferences preferences) {
 		if(!notificationShowing) {
 			Log.d(LOGTAG, "updateNotification: Notification is not visible. Don't update!");
 			return;
 		}
+		boolean showNetworkName = preferences.getBoolean(context.getString(R.string.pref_showNetworkName), true);
+		boolean showSignalStrength = preferences.getBoolean(context.getString(R.string.pref_showSignalStrength), true);
+		int cellularSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_cellularSignalStrengthUnit), "0"));
+		int wifiSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_wifiSignalStrengthUnit), "0"));
+
 		boolean wifiConnected = data.getInt(CommonKeys.WIFI_SPEED) > 0;
-		int iconRes = getIndicatorIconRes(wifiConnected, data.getInt(CommonKeys.WIFI_RSSI),
-				data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE), data.getInt(CommonKeys.CELLULAR_ASU_LEVEL));
+		int wifiRssi = data.getInt(CommonKeys.WIFI_RSSI);
+		int cellularAsuLevel = data.getInt(CommonKeys.CELLULAR_ASU_LEVEL);
+		String networkName = data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR);
+		if(networkName.length() == 0) {
+			cellularAsuLevel = 0;
+		}
+		String signalStrength = "";
+		if(wifiConnected) {
+			networkName = data.getString(CommonKeys.WIFI_SSID).replace("\"", "");
+			if(wifiSignalStrengthUnit == 0)
+				signalStrength = "" + getWifiSignalStrengthPercentage(wifiRssi);
+			else if(wifiSignalStrengthUnit == 1)
+				signalStrength = "dBm";
+			else if(wifiSignalStrengthUnit == 2)
+				signalStrength = "" + wifiRssi;
+		}
+		else {
+			if(cellularAsuLevel < 0) {
+				networkName = "no service";
+				signalStrength = "";
+			} else if(cellularAsuLevel == 0) {
+				networkName = "emergency only";
+				signalStrength = "";
+			} else {
+				networkName = data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR);
+				if(cellularSignalStrengthUnit == 0)
+					signalStrength = "" + getCellularSignalStrenghPercentage(data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE), data.getInt(CommonKeys.CELLULAR_ASU_LEVEL));
+				else if(cellularSignalStrengthUnit == 1)
+					signalStrength = "" + data.getInt(CommonKeys.CELLULAR_DBM);
+				else if(cellularSignalStrengthUnit == 2)
+					signalStrength = "" + data.getInt(CommonKeys.CELLULAR_ASU_LEVEL);
+			}
+		}
+		int iconRes = getIndicatorIconRes(wifiConnected, wifiRssi, data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE), cellularAsuLevel);
 		if(iconRes < 0)
 			iconRes = R.drawable.ic_launcher;
-		String title;
-		if(wifiConnected)
-			title = data.getInt(CommonKeys.WIFI_RSSI) + " " + data.getString(CommonKeys.WIFI_SSID).replace("\"", "");
-		else {
-			if(data.getInt(CommonKeys.CELLULAR_DBM) == Integer.MIN_VALUE)
-				title = "no service";
-			else
-				title = data.getInt(CommonKeys.CELLULAR_DBM) + " " + data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR);
-		}
+
 		String logMessage = "";
 		logMessage += CommonKeys.WIFI_SSID + "=" + data.getString(CommonKeys.WIFI_SSID) + "  ";
 		logMessage += CommonKeys.WIFI_RSSI + "=" + data.getInt(CommonKeys.WIFI_RSSI) + "  ";
@@ -229,11 +257,19 @@ public class NetworkNotificationService extends Service {
 		Bitmap icon = BitmapFactory.decodeResource(context.getResources(), iconRes);
 		largeIconCanvas.drawBitmap(icon, new Rect(0, 0, icon.getWidth(), icon.getHeight()), new Rect(130, 70, 270, 210), paint);
 
+		String title = "";
+		if(showSignalStrength)
+			title += signalStrength + " ";
+		if(showNetworkName)
+			title += networkName;
+		if(title.length() == 0)
+			title = "";
+
 		final Notification.Builder notificationBuilder = new Notification.Builder(context)
 				.setLargeIcon(largeIcon)
 				.setSmallIcon(iconRes)		// you have to include this
 				.setContentTitle(title)
-				//.setContentText(logMessage)	// DEBUG
+				.setContentText(networkName)
 				.setPriority(2)
 				.setCategory(Notification.CATEGORY_STATUS);
 		if(vibrate)
@@ -435,5 +471,31 @@ public class NetworkNotificationService extends Service {
 		if(rssi < -50)
 			return 4;
 		return 5;
+	}
+
+	public static int getWifiSignalStrengthPercentage(int rssi) {
+		int percent = (int)((rssi + 100) / 60f * 100);
+		if(percent < 0)
+			percent = 0;
+		return percent;
+	}
+
+	public static int getCellularSignalStrenghPercentage(int networkType, int asuLevel) {
+		// http://www.lte-anbieter.info/technik/asu.php
+		switch (networkType) {
+			case 0:	// GSM
+			case TelephonyManager.NETWORK_TYPE_GPRS:
+			case TelephonyManager.NETWORK_TYPE_EDGE:
+			case TelephonyManager.NETWORK_TYPE_HSDPA:
+			case TelephonyManager.NETWORK_TYPE_HSPA:
+			case TelephonyManager.NETWORK_TYPE_HSPAP:
+			case TelephonyManager.NETWORK_TYPE_HSUPA:
+			case TelephonyManager.NETWORK_TYPE_UMTS:
+				return (int)(asuLevel / 32f * 100);
+			case TelephonyManager.NETWORK_TYPE_LTE:
+				return (int)(asuLevel / 95f * 100);
+		}
+		Log.e(LOGTAG, "getCellularSignalStrenghPercentage: unknown network type: " + networkType);
+		return -1;
 	}
 }

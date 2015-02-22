@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_label">Wear Netzwerk Benachrichtigungen</string>
+    <string name="pref_notifications_category_title">Benachrichtigungen</string>
+    <string name="pref_showNotifications_summ_off">Es werden keine Benachrichtigungen ausgelöst</string>
+    <string name="pref_showNotifications_summ_on">Konnektivitätsereignisse lösen Benachrichtigungen auf der Uhr aus</string>
+    <string name="pref_showNotifications_title">Zeige Benachrichtigungen</string>
+    <string name="pref_vibration_summ_off">Vibration ist deaktiviert</string>
+    <string name="pref_vibration_summ_on">Vibrieren bei jeder Benachrichtigung</string>
+    <string name="pref_vibration_title">Vibration</string>
+    <string name="pref_cellularOffline_summ_off">Keine Benachrichtigung beim Wechsel von Mobilfunk nach Offline</string>
+    <string name="pref_cellularOffline_summ_on">Benachrichtigen beim Wechsel von Mobilfunk nach Offline</string>
+    <string name="pref_cellularWifi_summ_off">Keine Benachrichtigung beim Wechsel von Mobilfunk nach WLAN</string>
+    <string name="pref_offlineCellular_summ_off">Keine Benachrichtigung beim Wechsel von Offline nach Mobilfunk</string>
+    <string name="pref_offlineWifi_summ_off">Keine Benachrichtigung beim Wechsel von Offline nach WLAN</string>
+    <string name="pref_wifiCellular_summ_off">Keine Benachrichtigung beim Wechsel von WLAN nach Mobilfunk</string>
+    <string name="pref_wifiOffline_summ_off">Keine Benachrichtigung beim Wechsel von WLAN nach Offline</string>
+    <string name="pref_cellularOffline_title">MOBILFUNK --> OFFLINE</string>
+    <string name="pref_cellularWifi_title">MOBILFUNK --> WLAN</string>
+    <string name="pref_offlineCellular_title">OFFLINE --> MOBILFUNK</string>
+    <string name="pref_offlineWifi_title">OFFLINE --> WLAN</string>
+    <string name="pref_wifiCellular_title">WLAN --> MOBILFUNK</string>
+    <string name="pref_wifiOffline_title">WLAN --> OFFLINE</string>
+    <string name="pref_cellularWifi_summ_on">Benachrichtigen beim Wechsel von Mobilfunk nach WLAN</string>
+    <string name="pref_offlineCellular_summ_on">Benachrichtigen beim Wechsel von Offline nach Mobilfunk</string>
+    <string name="pref_offlineWifi_summ_on">Benachrichtigen beim Wechsel von Offline nach WLAN</string>
+    <string name="pref_wifiCellular_summ_on">Benachrichtigen beim Wechsel von WLAN nach Mobilfunk</string>
+    <string name="pref_wifiOffline_summ_on">Benachrichtigen beim Wechsel von WLAN nach Offline</string>
+    <string name="pref_wearableOffline_title">BLUETOOTH GETRENNT</string>
+    <string name="pref_wearableOffline_summ_on">Benachrichtigen wenn die Bluetoothverbindung zur Uhr getrennt wird</string>
+    <string name="pref_wearableOffline_summ_off">Keine Benachrichtigen wenn die Bluetoothverbindung zur Uhr getrennt wird</string>
+    <string name="pref_wearableOnline_title">BLUETOOTH VERBUNDEN</string>
+    <string name="pref_wearableOnline_summ_on">Benachrichtigen wenn die Bluetoothverbindung zur Uhr hergestellt wird</string>
+    <string name="pref_wearableOnline_summ_off">Keine Benachrichtigen wenn die Bluetoothverbindung zur Uhr hergestellt wird</string>
+    <string name="pref_cellularSignalStrengthUnit_title">Mobilfunk Signalstärke Einheit</string>
+    <string name="pref_showNetworkName_summ_off">Netzwerkname wird nicht angezeigt</string>
+    <string name="pref_showNetworkName_summ_on">Netzwerkname wird angezeigt</string>
+    <string name="pref_showNetworkName_title">Zeige Netzwerkname</string>
+    <string name="pref_showSignalStrength_summ_off">Signalstärke wird nicht angezeigt</string>
+    <string name="pref_showSignalStrength_summ_on">Signalstärke wird angezeigt</string>
+    <string name="pref_showSignalStrength_title">Zeige Signalstärke</string>
+    <string name="pref_wifiSignalStrengthUnit_title">Wlan Signalstärke Einheit</string>
+    <string name="pref_view_category_title">Ansicht</string>
+    <string name="pref_wifiSignalStrengthUnit_summ">Einheit ist: %s</string>
+    <string name="pref_cellularSignalStrengthUnit_summ">Einheit ist: %s</string>
+</resources>

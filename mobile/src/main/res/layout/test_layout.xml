@@ -30,5 +30,12 @@
         android:layout_width="match_parent"
         android:layout_height="fill_parent"
         android:scrollbars="horizontal"
-        android:id="@+id/tv_output"/>
+        android:id="@+id/tv_output"
+        android:text="Wie gesagt, die App ist noch nicht fertig.
+Hier auf dem Smartphone lassen sich später Einstellungen
+ändern. Diese App kann einfach geschlossen werden. Bei
+jedem Übergang UMTS->WLAN bzw andersrum und auch bei
+Netzverlust usw. gibt es eine Benachrichtigung auf die Uhr.
+Die App kann auf der Uhr aber auch mit 'Starte Netwerkbenachrichtigungen'
+manuell gestartet werden"/>
 </LinearLayout>

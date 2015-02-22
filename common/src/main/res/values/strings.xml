@@ -1,3 +1,64 @@
 <resources>
-    <string name="app_name">common</string>
+    <string name="app_name" translatable="false">WearNetworkNotifications</string>
+    <string name="app_label">Wear Network Notifications</string>
+    <string name="pref_notifications_category" translatable="false">pref_notifications_category</string>
+    <string name="pref_notifications_category_title">Notifications</string>
+    <string name="pref_showNotifications" translatable="false">pref_showNotifications</string>
+    <string name="pref_showNotifications_title">Show Notifications</string>
+    <string name="pref_showNotifications_summ_on">Connectifity Events will trigger notifications on the watch</string>
+    <string name="pref_showNotifications_summ_off">No notifications will be triggered on the watch</string>
+    <string name="pref_vibration" translatable="false">pref_vibration</string>
+    <string name="pref_vibration_title">Vibration</string>
+    <string name="pref_vibration_summ_on">The watch vibrates with each notification</string>
+    <string name="pref_vibration_summ_off">Vibration is turned off</string>
+    <string name="pref_wifiOffline" translatable="false">pref_wifiOffline</string>
+    <string name="pref_wifiOffline_title">WIFI --> OFFLINE</string>
+    <string name="pref_wifiOffline_summ_on">Notify if state changes from wifi to offline</string>
+    <string name="pref_wifiOffline_summ_off">No notification when going from wifi to offline state</string>
+    <string name="pref_wifiCellular" translatable="false">pref_wifiCellular</string>
+    <string name="pref_wifiCellular_title">WIFI --> CELLULAR</string>
+    <string name="pref_wifiCellular_summ_on">Notify if state changes from wifi to cellular network</string>
+    <string name="pref_wifiCellular_summ_off">No notification when state changes from wifi to cellular network</string>
+    <string name="pref_cellularOffline" translatable="false">pref_cellularOffline</string>
+    <string name="pref_cellularOffline_title">CELLULAR --> OFFLINE</string>
+    <string name="pref_cellularOffline_summ_on">Notify if state changes from cellular network to offline</string>
+    <string name="pref_cellularOffline_summ_off">No notification when going from cellular network to offline state</string>
+    <string name="pref_cellularWifi" translatable="false">pref_cellularWifi</string>
+    <string name="pref_cellularWifi_title">CELLULAR --> WIFI</string>
+    <string name="pref_cellularWifi_summ_on">Notify if state changes from cellular network to wifi</string>
+    <string name="pref_cellularWifi_summ_off">No notification when state changes from cellular network to wifi</string>
+    <string name="pref_offlineWifi" translatable="false">pref_offlineWifi</string>
+    <string name="pref_offlineWifi_title">OFFLINE --> WIFI</string>
+    <string name="pref_offlineWifi_summ_on">Notify if state changes from offline to wifi</string>
+    <string name="pref_offlineWifi_summ_off">No notification when going from offline state to wifi</string>
+    <string name="pref_offlineCellular" translatable="false">pref_offlineCellular</string>
+    <string name="pref_offlineCellular_title">OFFLINE --> CELLULAR</string>
+    <string name="pref_offlineCellular_summ_on">Notify if state changes from offline to cellular network</string>
+    <string name="pref_offlineCellular_summ_off">No notification when going from offline state to cellular network</string>
+    <string name="pref_wearableOffline" translatable="false">pref_wearableOffline</string>
+    <string name="pref_wearableOffline_title">BLUETOOTH DISCONNECTS</string>
+    <string name="pref_wearableOffline_summ_on">Notify if the wearable disconnects from the handheld device</string>
+    <string name="pref_wearableOffline_summ_off">No notification when the wearable disconnects from the handheld device</string>
+    <string name="pref_wearableOnline" translatable="false">pref_wearableOnline</string>
+    <string name="pref_wearableOnline_title">BLUETOOTH CONNECTS</string>
+    <string name="pref_wearableOnline_summ_on">Notify if the wearable connects from the handheld device</string>
+    <string name="pref_wearableOnline_summ_off">No notification when the wearable connects from the handheld device</string>
+    <string name="pref_view_category" translatable="false">pref_view_category</string>
+    <string name="pref_view_category_title">View</string>
+    <string name="pref_showNetworkName" translatable="false">pref_showNetworkName</string>
+    <string name="pref_showNetworkName_title">Show network name</string>
+    <string name="pref_showNetworkName_summ_on">Network name is displayed</string>
+    <string name="pref_showNetworkName_summ_off">Network name is not displayed</string>
+    <string name="pref_showSignalStrength" translatable="false">pref_showSignalStrength</string>
+    <string name="pref_showSignalStrength_title">Show signal strength</string>
+    <string name="pref_showSignalStrength_summ_on">Signal strength is displayed</string>
+    <string name="pref_showSignalStrength_summ_off">Signal strength is not displayed</string>
+    <string name="pref_wifiSignalStrengthUnit" translatable="false">pref_wifiSignalStrengthUnit</string>
+    <string name="pref_wifiSignalStrengthUnit_title">Wifi signal strength unit</string>
+    <string name="pref_wifiSignalStrengthUnit_summ">Unit is set to: %s</string>
+    <string name="pref_wifiSignalStrengthUnit_default" translatable="false">0</string>
+    <string name="pref_cellularSignalStrengthUnit" translatable="false">pref_cellularSignalStrengthUnit</string>
+    <string name="pref_cellularSignalStrengthUnit_title">Cellular signal strength unit</string>
+    <string name="pref_cellularSignalStrengthUnit_summ">Unit is set to: %s</string>
+    <string name="pref_cellularSignalStrengthUnit_default" translatable="false">0</string>
 </resources>
