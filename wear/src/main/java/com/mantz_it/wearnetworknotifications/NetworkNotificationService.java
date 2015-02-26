@@ -29,7 +29,31 @@ import com.mantz_it.common.CommonPaths;
 import com.mantz_it.common.WearableApiHelper;
 
 /**
- * Created by dennis on 12/02/15.
+ * <h1>Wear Network Notifications - Network Notification Service</h1>
+ *
+ * Module:      NetworkNotificationService.java
+ * Description: This service will show a notification on the wearable when invoked and live as
+ *              long as the notification is visible. It registers a BroadcastReceiver to intercept
+ *              wake-up events and initiate an update on each wake-up.
+ *
+ * @author Dennis Mantz
+ *
+ * Copyright (C) 2015 Dennis Mantz
+ * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class NetworkNotificationService extends Service {
 	private static final String LOGTAG = "NetworkNotificationService";
@@ -53,6 +77,9 @@ public class NetworkNotificationService extends Service {
 		super.onCreate();
 		Log.d(LOGTAG, "onCreate");
 		sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+		// Create a BroadcastReceiver to receive 'wake up' / 'request update' intents
+		// as well as 'dismiss notification' intents:
 		wakeUpBroadcastReceiver = new BroadcastReceiver(){
 			private long lastUpdateRequestTimestamp = 0;
 			@Override
@@ -116,6 +143,8 @@ public class NetworkNotificationService extends Service {
 				}
 			}
 		};
+
+		// register the BroadcastReceiver:
 		IntentFilter intentFilter = new IntentFilter();
 		intentFilter.addAction(Intent.ACTION_SCREEN_ON);
 		intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
@@ -123,6 +152,7 @@ public class NetworkNotificationService extends Service {
 		intentFilter.addAction(ACTION_DISMISS_NOTIFICATION);
 		registerReceiver(wakeUpBroadcastReceiver, intentFilter);
 
+		// from this point on we are in state 'notification showing' and will allow updates for notifications
 		notificationShowing = true;
 	}
 
@@ -130,8 +160,10 @@ public class NetworkNotificationService extends Service {
 	public void onDestroy() {
 		super.onDestroy();
 		Log.d(LOGTAG, "onDestroy");
+		// unregister the receiver
 		unregisterReceiver(wakeUpBroadcastReceiver);
 
+		// from this point on we are in state 'notification dismissed' and will not allow updates to be shown.
 		notificationShowing = false;
 	}
 
@@ -144,6 +176,8 @@ public class NetworkNotificationService extends Service {
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(LOGTAG, "onStartCommand: " + intent.getAction());
 		Bundle data = intent.getBundleExtra(CommonPaths.CONNECTION_DATA);
+
+		// create a notification depending on the received intent
 		if(intent.getAction().equals(ACTION_SHOW_NOTIFICATION)) {
 			// nothing special with this one
 		} else if(intent.getAction().equals(ACTION_NOW_OFFLINE)) {
@@ -156,12 +190,22 @@ public class NetworkNotificationService extends Service {
 		return START_STICKY;
 	}
 
+	/**
+	 * Will create and show a notification on the wearable.
+	 *
+	 * @param context		application context
+	 * @param data			connection data (may be null; in this case the notification shows 'loading')
+	 * @param connected		true if the handheld node is connected; false if no connection to smartphone
+	 * @param preferences	shared preference instance
+	 */
 	public static void createNotification(Context context, Bundle data, boolean connected, SharedPreferences preferences) {
 		boolean vibrate = preferences.getBoolean(context.getString(R.string.pref_vibration), true);
 
+		// if we have data, just call updateNotification() to show the notification:
 		if(data != null)
 			updateNotification(context, data, vibrate, preferences);
 		else {
+			// otherwise we show 'loading' or 'offline':
 			int iconRes = connected ? R.drawable.ic_launcher : R.drawable.offline;
 			String title = connected ? "loading..." : "offline";
 			final Notification.Builder notificationBuilder = new Notification.Builder(context)
@@ -177,6 +221,7 @@ public class NetworkNotificationService extends Service {
 			if(vibrate)
 				notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
 
+			// Add a dismiss intent to the notification which will be received by the BroadcastReceiver
 			Intent deleteIntent = new Intent(ACTION_DISMISS_NOTIFICATION);
 			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
 			notificationBuilder.setDeleteIntent(pendingIntent);
@@ -186,7 +231,7 @@ public class NetworkNotificationService extends Service {
 			// Build the notification and issues it with notification manager.
 			notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
-			// Request an update of the network data (only if we are online):
+			// Request an update of the network data from the smartphone (only if we are online):
 			if(connected) {
 				Intent intent = new Intent(ACTION_REQUEST_UPDATE);
 				context.sendBroadcast(intent);
@@ -194,6 +239,14 @@ public class NetworkNotificationService extends Service {
 		}
 	}
 
+	/**
+	 * Will update the notification with the latest connection data
+	 *
+	 * @param context		application context
+	 * @param data			connection data (must not be null)
+	 * @param vibrate		if true, the wearable device will vibrate
+	 * @param preferences	shared preference instance
+	 */
 	public static void updateNotification(Context context, Bundle data, boolean vibrate, SharedPreferences preferences) {
 		if(!notificationShowing) {
 			Log.d(LOGTAG, "updateNotification: Notification is not visible. Don't update!");
@@ -290,6 +343,15 @@ public class NetworkNotificationService extends Service {
 		notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 	}
 
+	/**
+	 * Will return the icon resource that fits to the given connection situation
+	 *
+	 * @param wifiConnected		true if wifi is currently connected
+	 * @param wifiRssi			RSSI (signal strength) of the wifi signal
+	 * @param networkType		type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
+	 * @param asuLevel			ASU level (signal strength) of the cellular signal
+	 * @return icon resource or -1 on error
+	 */
 	public static int getIndicatorIconRes(boolean wifiConnected, int wifiRssi, int networkType, int asuLevel) {
 		if(wifiConnected) {
 			int cellularStrength = getCellularSignalStrengh(networkType, asuLevel);
@@ -409,6 +471,13 @@ public class NetworkNotificationService extends Service {
 		}
 	}
 
+	/**
+	 * Will return the signal strength of the cellular signal on a scale from 0 (no signal) to 5 (strong signal)
+	 *
+	 * @param networkType	type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
+	 * @param asuLevel		ASU level (signal strength) of the cellular signal
+	 * @return signal strength (0 - 5)
+	 */
 	public static int getCellularSignalStrengh(int networkType, int asuLevel) {
 		// http://www.lte-anbieter.info/technik/asu.php
 		switch (networkType) {
@@ -459,6 +528,12 @@ public class NetworkNotificationService extends Service {
 		return -1;
 	}
 
+	/**
+	 * Will return the signal strength of the wifi signal on a scale from 0 (no signal) to 5 (strong signal)
+	 *
+	 * @param rssi		RSSI (signal strength) of the wifi signal
+	 * @return signal strength (0 - 5)
+	 */
 	public static int getWifiSignalStrength(int rssi) {
 		if(rssi < -100)
 			return 0;
@@ -473,6 +548,15 @@ public class NetworkNotificationService extends Service {
 		return 5;
 	}
 
+	/**
+	 * Will convert the RSSI value to percent.
+	 *    -100 or lower will convert to 0%
+	 *    -40 will convert to 100%
+	 *    higher values will result in a percentage greater 100
+	 *
+	 * @param rssi		RSSI (signal strength) of the wifi signal
+	 * @return signal strength in percent
+	 */
 	public static int getWifiSignalStrengthPercentage(int rssi) {
 		int percent = (int)((rssi + 100) / 60f * 100);
 		if(percent < 0)
@@ -480,6 +564,13 @@ public class NetworkNotificationService extends Service {
 		return percent;
 	}
 
+	/**
+	 * Will convert the ASU value to percent.
+	 *
+	 * @param networkType	type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
+	 * @param asuLevel		ASU level (signal strength) of the cellular signal
+	 * @return signal strength in percent
+	 */
 	public static int getCellularSignalStrenghPercentage(int networkType, int asuLevel) {
 		// http://www.lte-anbieter.info/technik/asu.php
 		switch (networkType) {

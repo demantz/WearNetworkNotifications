@@ -6,7 +6,30 @@ import android.preference.ListPreference;
 import android.preference.PreferenceFragment;
 
 /**
- * Created by dennis on 18/02/15.
+ * <h1>Wear Network Notifications - Settings Fragment</h1>
+ *
+ * Module:      SettingsFragment.java
+ * Description: The SettingsFragment enables the user to change preferences defined in
+ *              preferences.xml.
+ *
+ * @author Dennis Mantz
+ *
+ * Copyright (C) 2015 Dennis Mantz
+ * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class SettingsFragment  extends PreferenceFragment implements SharedPreferences.OnSharedPreferenceChangeListener {
 
@@ -22,14 +45,16 @@ public class SettingsFragment  extends PreferenceFragment implements SharedPrefe
 	public void onResume() {
 		super.onResume();
 
+		// add change listener for shared preferences:
 		getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(this);
 		updateSummaries();
 	}
 
 	@Override
 	public void onPause() {
-		super.onPause();
+		// unregister change listener:
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+		super.onPause();
 	}
 
 	@Override
@@ -40,7 +65,6 @@ public class SettingsFragment  extends PreferenceFragment implements SharedPrefe
 
 	/**
 	 * Will go through each preference element and initialize/update the summary according to its value.
-	 * @note this will also correct invalid user inputs on EdittextPreferences!
 	 */
 	public void updateSummaries() {
 		// Wifi signal strength unit

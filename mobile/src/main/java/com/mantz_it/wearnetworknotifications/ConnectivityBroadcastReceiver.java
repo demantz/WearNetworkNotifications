@@ -18,7 +18,31 @@ import com.mantz_it.common.WearableApiHelper;
 import java.util.Date;
 
 /**
- * Created by dennis on 12/02/15.
+ * <h1>Wear Network Notifications - Connectivity Broadcast Receiver</h1>
+ *
+ * Module:      ConnectivityBroadcastReceiver.java
+ * Description: This BroadcastReceiver will receive events related to connectivity and
+ *              network changes. It will analyze the situation and send a notification
+ *              message to the wearable if a state change was detected.
+ *
+ * @author Dennis Mantz
+ *
+ * Copyright (C) 2015 Dennis Mantz
+ * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 	private static final String LOGTAG = "ConnectivityBroadcastReceiver";
@@ -27,8 +51,15 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 	private static final int MOBILE		= 2;
 	private static final int WIFI		= 3;
 	private static final String[] STATE_NAMES = {"INVALID", "OFFLINE", "MOBILE", "WIFI"};
-	private static int lastConnectifityState = INVALID;
+	private static int lastConnectivityState = INVALID;
 
+	/**
+	 * Gets called after an CONNECTIVITY_CHANGE event. Will evaluate the necessary actions
+	 * and might send a message to notify the wearable.
+	 *
+	 * @param context	application context
+	 * @param intent	CONNECTIVITY_CHANGE intent
+	 */
 	@Override
 	public void onReceive(final Context context, Intent intent) {
 		Log.d(LOGTAG, "onReceive: " + intent.toString());
@@ -39,7 +70,9 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 		final Bundle extras = intent.getExtras();
 		final SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
 
+		// only look into current and last state if notifications are enabled.
 		if(preferences.getBoolean(context.getString(R.string.pref_showNotifications), true)) {
+			// do evaluation and message sending in a separate thread:
 			new Thread() {
 				public void run() {
 					Log.d(LOGTAG, "onReceive: Thread " + this.getName() + " started!");
@@ -50,47 +83,48 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 					data.writeToParcel(dataParcel, 0);
 
 					// determine the current state:
-					int currentConnectifityState = INVALID;
+					int currentConnectivityState = INVALID;
 					if (data.getInt(CommonKeys.WIFI_SPEED) < 0) {
 						// WIFI is disconnected
 						if (data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR).length() == 0
 								|| data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE) == 0) {
 							// CELLULAR is also disconnected. we are offline.
-							currentConnectifityState = OFFLINE;
+							currentConnectivityState = OFFLINE;
 						} else {
 							// CELLULAR is connected
-							currentConnectifityState = MOBILE;
+							currentConnectivityState = MOBILE;
 						}
 					} else {
 						// WIFI is connected
-						currentConnectifityState = WIFI;
+						currentConnectivityState = WIFI;
 					}
 
 					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): " + (new Date()).toString() + " Event=" + extras.get("networkInfo"));
-					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): ConnectifityState: " + STATE_NAMES[lastConnectifityState]
-							+ " ==> " + STATE_NAMES[currentConnectifityState]);
+					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): ConnectifityState: " + STATE_NAMES[lastConnectivityState]
+							+ " ==> " + STATE_NAMES[currentConnectivityState]);
 
+					// check if we have to send an notification according to the current settings:
 					boolean sendNotification = false;
-					if(lastConnectifityState == WIFI && currentConnectifityState == OFFLINE
+					if(lastConnectivityState == WIFI && currentConnectivityState == OFFLINE
 							&& preferences.getBoolean(context.getString(R.string.pref_wifiOffline), true))
 						sendNotification = true;
-					else if(lastConnectifityState == WIFI && currentConnectifityState == MOBILE
+					else if(lastConnectivityState == WIFI && currentConnectivityState == MOBILE
 							&& preferences.getBoolean(context.getString(R.string.pref_wifiCellular), true))
 						sendNotification = true;
-					else if(lastConnectifityState == MOBILE && currentConnectifityState == OFFLINE
+					else if(lastConnectivityState == MOBILE && currentConnectivityState == OFFLINE
 								&& preferences.getBoolean(context.getString(R.string.pref_cellularOffline), true))
 						sendNotification = true;
-					else if(lastConnectifityState == MOBILE && currentConnectifityState == WIFI
+					else if(lastConnectivityState == MOBILE && currentConnectivityState == WIFI
 							&& preferences.getBoolean(context.getString(R.string.pref_cellularWifi), true))
 						sendNotification = true;
-					else if(lastConnectifityState == OFFLINE && currentConnectifityState == WIFI
+					else if(lastConnectivityState == OFFLINE && currentConnectivityState == WIFI
 							&& preferences.getBoolean(context.getString(R.string.pref_offlineWifi), true))
 						sendNotification = true;
-					else if(lastConnectifityState == OFFLINE && currentConnectifityState == MOBILE
+					else if(lastConnectivityState == OFFLINE && currentConnectivityState == MOBILE
 							&& preferences.getBoolean(context.getString(R.string.pref_offlineCellular), true))
 						sendNotification = true;
 
-					lastConnectifityState = currentConnectifityState;
+					lastConnectivityState = currentConnectivityState;
 					if(!sendNotification) {
 						Log.d(LOGTAG, "onReceive (Thread=" + this.getName() + "): No notification will be send according to the prefs.");
 						return;

@@ -1,0 +1,13 @@
+CHANGELOG - Wear Network Notifications
+
+version 1.01
+ - First released version. Might be unstable.
+ - Basic functionality works (untested):
+   - Notify on connectifity events:
+     WIFI <--> MOBILE <--> OFFLINE
+   - Update notification when device wakes up
+   - Notifications customizable
+ - Available languages: English and German
+
+version 1.00
+ - prototype

@@ -28,7 +28,32 @@ import com.mantz_it.common.CommonPaths;
 import com.mantz_it.common.WearableApiHelper;
 
 /**
- * Created by dennis on 13/02/15.
+ * <h1>Wear Network Notifications - Phone Wearable Listener Service</h1>
+ *
+ * Module:      PhoneWearableListenerService.java
+ * Description: This service gets invoked by events related to the wearable API.
+ *              Tasks:
+ *              - Responding to REQUEST_UPDATE messages by sending updated connection data.
+ *              - Sending lasted shared preferences to the wearable when it connects.
+ *
+ * @author Dennis Mantz
+ *
+ * Copyright (C) 2015 Dennis Mantz
+ * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class PhoneWearableListenerService extends WearableListenerService {
 
@@ -49,7 +74,8 @@ public class PhoneWearableListenerService extends WearableListenerService {
 	public void onMessageReceived(MessageEvent messageEvent) {
 		super.onMessageReceived(messageEvent);
 		if(messageEvent.getPath().equals(CommonPaths.REQUEST_UPDATE)) {
-			// update data in the background:
+			// The wearable has requested updated connection data. collect and send data in a
+			// separate thread:
 			new Thread() {
 				public void run() {
 					Log.d(LOGTAG, "onMessageReceived: Thread " + this.getName() + " started!");
@@ -82,6 +108,39 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		}
 	}
 
+	/**
+	 * Gets called after a wearable node connects to the phone. Will synchronize the
+	 * shared preferences to the new node.
+	 *
+	 * @param peer		node ID of the connected wearable
+	 */
+	@Override
+	public void onPeerConnected(Node peer) {
+		Log.d(LOGTAG, "onPeerConnected: update preferences...");
+
+		// create and connect the googleApiClient:
+		GoogleApiClient googleApiClient = WearableApiHelper
+				.createAndConnectGoogleApiClient(PhoneWearableListenerService.this, 1000);
+		if(googleApiClient == null) {
+			Log.e(LOGTAG, "onPeerConnected: Can't connect the google api client! stop.");
+			return;
+		}
+
+		// update the preferences:
+		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
+		updateSharedPreferences(googleApiClient, PhoneWearableListenerService.this, preferences);
+
+		// disconnect the api client:
+		googleApiClient.disconnect();
+	}
+
+	/**
+	 * Will put all relevant shared preferences into a DataItem to be synced to the wearable.
+	 *
+	 * @param googleApiClient		connected google API client
+	 * @param context				application context
+	 * @param sharedPreferences		shared preferences instance
+	 */
 	public static void updateSharedPreferences(GoogleApiClient googleApiClient, Context context,
 											   SharedPreferences sharedPreferences) {
 		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.SHARED_PREFERENCES);
@@ -122,6 +181,12 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		updateConnectionData(googleApiClient, context);
 	}
 
+	/**
+	 * Will gather the connection data and put them into a DataItem to be synced to the wearable
+	 *
+	 * @param googleApiClient	connected google API client
+	 * @param context			application context
+	 */
 	public static void updateConnectionData(GoogleApiClient googleApiClient, Context context) {
 		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.CONNECTION_DATA);
 
@@ -132,6 +197,12 @@ public class PhoneWearableListenerService extends WearableListenerService {
 				Wearable.DataApi.putDataItem(googleApiClient, putDataReq);
 	}
 
+	/**
+	 * Will gather all relevant connection data from Wifi- and TelephonyManager.
+	 *
+	 * @param context	application context
+	 * @return Bundle containing the connection data
+	 */
 	public static Bundle gatherConnectionData(Context context) {
 		Bundle data = new Bundle();
 
@@ -145,6 +216,7 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
 		data.putString(CommonKeys.CELLULAR_NETWORK_OPERATOR, tm.getNetworkOperatorName());
 		data.putInt(CommonKeys.CELLULAR_NETWORK_TYPE, tm.getNetworkType());
+		// Get the signal strength by looking at the first connected cell (if it exists):
 		int dbm = Integer.MIN_VALUE;
 		int asuLevel = Integer.MIN_VALUE;
 		if(tm.getAllCellInfo() != null && !tm.getAllCellInfo().isEmpty()) {
@@ -174,33 +246,5 @@ public class PhoneWearableListenerService extends WearableListenerService {
 		data.putLong(CommonKeys.TIMESTAMP, System.currentTimeMillis());
 
 		return data;
-	}
-
-	@Override
-	public void onPeerConnected(Node peer) {
-		Log.d(LOGTAG, "onPeerConnected: update preferences...");
-
-		// create and connect the googleApiClient:
-		GoogleApiClient googleApiClient = WearableApiHelper
-				.createAndConnectGoogleApiClient(PhoneWearableListenerService.this, 1000);
-		if(googleApiClient == null) {
-			Log.e(LOGTAG, "onPeerConnected: Can't connect the google api client! stop.");
-			return;
-		}
-
-		// Enumerate nodes to find wearable node:
-		Node wearableNode = WearableApiHelper.getOpponentNode(googleApiClient, 1000);
-		if(wearableNode == null) {
-			Log.e(LOGTAG, "onPeerConnected: Can't get the wearable node! stop.");
-			googleApiClient.disconnect();
-			return;
-		}
-
-		// update the preferences:
-		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		updateSharedPreferences(googleApiClient, PhoneWearableListenerService.this, preferences);
-
-		// disconnect the api client:
-		googleApiClient.disconnect();
 	}
 }

@@ -44,7 +44,33 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 
 /**
- * Created by dennis on 18/02/15.
+ * <h1>Wear Network Notifications - Settings Activity</h1>
+ *
+ * Module:      SettingsActivity.java
+ * Description: This is the main activity of the mobile app. It holds the SettingsFragment
+ *              which enables the user to change preferences. This activity registers a
+ *              listener for changed preferences and syncs them to the wearable.
+ *              The action bar provides actions to trigger a test notification,
+ *              show network information and logs.
+ *
+ * @author Dennis Mantz
+ *
+ * Copyright (C) 2015 Dennis Mantz
+ * License: http://www.gnu.org/licenses/gpl.html GPL version 2 or higher
+ *
+ * This library is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public
+ * License as published by the Free Software Foundation; either
+ * version 2 of the License, or (at your option) any later version.
+ *
+ * This library is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ * General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public
+ * License along with this library; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class SettingsActivity extends Activity implements GoogleApiClient.ConnectionCallbacks,
 		GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener, NodeApi.NodeListener,
@@ -59,12 +85,14 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 
+		// create the SettingsFragment and place it inside the activity:
 		SettingsFragment settingsFragment = new SettingsFragment();
 		FragmentManager fragmentManager = getFragmentManager();
 		FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
 		fragmentTransaction.replace(android.R.id.content, settingsFragment);
 		fragmentTransaction.commit();
 
+		// Create a google api client
 		googleApiClient = new GoogleApiClient.Builder(this)
 				.addConnectionCallbacks(this)
 				.addOnConnectionFailedListener(this)
@@ -82,9 +110,6 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 
 		// connect the google api client
 		googleApiClient.connect();
-
-		// register the change listener on the shared preferences:
-
 	}
 
 	@Override
@@ -99,6 +124,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 
 	@Override
 	protected void onDestroy() {
+		// unregister change listener:
 		if(preferences != null)
 			preferences.unregisterOnSharedPreferenceChangeListener(this);
 		super.onDestroy();
@@ -352,6 +378,9 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 				.show();
 	}
 
+	/**
+	 * Will send a notification to the wearable containing the latest connection data.
+	 */
 	public void sendTestNotification() {
 		if(!googleApiClient.isConnected()) {
 			Log.e(LOGTAG, "sendTestNotification: google api client not connected!");
@@ -378,10 +407,13 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 		}.start();
 	}
 
+	/**
+	 * Will show a dialog that presents the current connection information
+	 */
 	public void showNetworkInformation() {
 		new AlertDialog.Builder(SettingsActivity.this)
 				.setTitle(getString(R.string.networkInformation))
-				.setMessage(getNetworkInformation())
+				.setMessage(getNetworkInformation())	// DEBUG
 				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// do nothing
@@ -391,6 +423,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 				.show();
 	}
 
+	// DEBUG
 	public String getNetworkInformation() {
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
@@ -458,6 +491,12 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 		return stringBuilder.toString();
 	}
 
+	/**
+	 * Will print the data from the NetworkInfo into the given StringBuilder instance
+	 *
+	 * @param info				NetworkInfo object
+	 * @param stringBuilder		StringBuilder instance
+	 */
 	public void printNetworkInfo(NetworkInfo info, StringBuilder stringBuilder) {
 		stringBuilder.append("Type=" + info.getTypeName() + "(" + info.getType() + ")");
 		stringBuilder.append("SubType=" + info.getSubtypeName() + "(" + info.getSubtype() + ")");
@@ -472,6 +511,11 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 		stringBuilder.append("toString=" + info.toString());
 	}
 
+	/**
+	 * Will trigger an update of the shared preferences to the wearable
+	 *
+	 * @param sharedPreferences		Shared Preferences instance
+	 */
 	public void sendPreferences(SharedPreferences sharedPreferences) {
 		if(!googleApiClient.isConnected()) {
 			Log.e(LOGTAG, "sendPreferences: google api client not connected!");
