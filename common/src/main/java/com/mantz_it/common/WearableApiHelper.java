@@ -1,11 +1,18 @@
 package com.mantz_it.common;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.os.Bundle;
 
 import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.common.api.PendingResult;
+import com.google.android.gms.wearable.DataApi;
+import com.google.android.gms.wearable.DataMap;
 import com.google.android.gms.wearable.MessageApi;
 import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
+import com.google.android.gms.wearable.PutDataMapRequest;
+import com.google.android.gms.wearable.PutDataRequest;
 import com.google.android.gms.wearable.Wearable;
 
 import java.util.concurrent.TimeUnit;
@@ -86,5 +93,69 @@ public class WearableApiHelper {
 		MessageApi.SendMessageResult sendMessageResult = Wearable.MessageApi.sendMessage(googleApiClient,
 				nodeId, path, payload).await(timeout, TimeUnit.MILLISECONDS);
 		return sendMessageResult.getStatus().isSuccess();
+	}
+
+	/**
+	 * Will put all relevant shared preferences into a DataItem to be synced to the wearable.
+	 *
+	 * @param googleApiClient		connected google API client
+	 * @param context				application context
+	 * @param sharedPreferences		shared preferences instance
+	 */
+	public static void updateSharedPreferences(GoogleApiClient googleApiClient, Context context,
+											   SharedPreferences sharedPreferences) {
+		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.SHARED_PREFERENCES);
+		DataMap dataMap = putDataMapReq.getDataMap();
+
+		String key = context.getString(R.string.pref_showNotifications);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_vibration);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_wearableOffline);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_wearableOnline);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_showNetworkName);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_showSignalStrength);
+		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
+
+		key = context.getString(R.string.pref_cellularSignalStrengthUnit);
+		dataMap.putString(key, sharedPreferences.getString(key, "0"));
+
+		key = context.getString(R.string.pref_wifiSignalStrengthUnit);
+		dataMap.putString(key, sharedPreferences.getString(key, "0"));
+
+		// also add a timestamp:
+		dataMap.putLong("TIMESTAMP", System.currentTimeMillis());
+
+		PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+		PendingResult<DataApi.DataItemResult> pendingResult =
+				Wearable.DataApi.putDataItem(googleApiClient, putDataReq);
+
+		// also send fresh connection data:
+		updateConnectionData(googleApiClient, context);
+	}
+
+	/**
+	 * Will gather the connection data and put them into a DataItem to be synced to the wearable
+	 *
+	 * @param googleApiClient	connected google API client
+	 * @param context			application context
+	 */
+	public static void updateConnectionData(GoogleApiClient googleApiClient, Context context) {
+		PutDataMapRequest putDataMapReq = PutDataMapRequest.create(CommonPaths.CONNECTION_DATA);
+
+		Bundle connectionData = ConnectionData.gatherConnectionData(context).toBundle();
+		putDataMapReq.getDataMap().putAll(DataMap.fromBundle(connectionData));
+
+		PutDataRequest putDataReq = putDataMapReq.asPutDataRequest();
+		PendingResult<DataApi.DataItemResult> pendingResult =
+				Wearable.DataApi.putDataItem(googleApiClient, putDataReq);
 	}
 }

@@ -11,8 +11,8 @@ import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
-import com.mantz_it.common.CommonKeys;
 import com.mantz_it.common.CommonPaths;
+import com.mantz_it.common.ConnectionData;
 import com.mantz_it.common.WearableApiHelper;
 
 import java.util.Date;
@@ -46,12 +46,7 @@ import java.util.Date;
  */
 public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 	private static final String LOGTAG = "ConnectivityBroadcastReceiver";
-	private static final int INVALID	= 0;
-	private static final int OFFLINE	= 1;
-	private static final int MOBILE		= 2;
-	private static final int WIFI		= 3;
-	private static final String[] STATE_NAMES = {"INVALID", "OFFLINE", "MOBILE", "WIFI"};
-	private static int lastConnectivityState = INVALID;
+	private static int lastConnectivityState = ConnectionData.STATE_INVALID;
 
 	/**
 	 * Gets called after an CONNECTIVITY_CHANGE event. Will evaluate the necessary actions
@@ -78,49 +73,40 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 					Log.d(LOGTAG, "onReceive: Thread " + this.getName() + " started!");
 
 					// Gather connection data:
-					Bundle data = PhoneWearableListenerService.gatherConnectionData(context);
-					Parcel dataParcel = Parcel.obtain();
-					data.writeToParcel(dataParcel, 0);
+					ConnectionData conData = ConnectionData.gatherConnectionData(context);
 
 					// determine the current state:
-					int currentConnectivityState = INVALID;
-					if (data.getInt(CommonKeys.WIFI_SPEED) < 0) {
-						// WIFI is disconnected
-						if (data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR).length() == 0
-								|| data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE) == 0) {
-							// CELLULAR is also disconnected. we are offline.
-							currentConnectivityState = OFFLINE;
-						} else {
-							// CELLULAR is connected
-							currentConnectivityState = MOBILE;
-						}
-					} else {
-						// WIFI is connected
-						currentConnectivityState = WIFI;
-					}
+					int currentConnectivityState = conData.getConnectionState();
 
 					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): " + (new Date()).toString() + " Event=" + extras.get("networkInfo"));
-					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): ConnectifityState: " + STATE_NAMES[lastConnectivityState]
-							+ " ==> " + STATE_NAMES[currentConnectivityState]);
+					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): ConnectifityState: "
+							+ ConnectionData.getConnectionStateName(lastConnectivityState)
+							+ " ==> " + conData.getConnectionStateName());
 
 					// check if we have to send an notification according to the current settings:
 					boolean sendNotification = false;
-					if(lastConnectivityState == WIFI && currentConnectivityState == OFFLINE
+					if(lastConnectivityState == ConnectionData.STATE_WIFI
+							&& currentConnectivityState == ConnectionData.STATE_OFFLINE
 							&& preferences.getBoolean(context.getString(R.string.pref_wifiOffline), true))
 						sendNotification = true;
-					else if(lastConnectivityState == WIFI && currentConnectivityState == MOBILE
+					else if(lastConnectivityState == ConnectionData.STATE_WIFI
+							&& currentConnectivityState == ConnectionData.STATE_MOBILE
 							&& preferences.getBoolean(context.getString(R.string.pref_wifiCellular), true))
 						sendNotification = true;
-					else if(lastConnectivityState == MOBILE && currentConnectivityState == OFFLINE
+					else if(lastConnectivityState == ConnectionData.STATE_MOBILE
+							&& currentConnectivityState == ConnectionData.STATE_OFFLINE
 								&& preferences.getBoolean(context.getString(R.string.pref_cellularOffline), true))
 						sendNotification = true;
-					else if(lastConnectivityState == MOBILE && currentConnectivityState == WIFI
+					else if(lastConnectivityState == ConnectionData.STATE_MOBILE
+							&& currentConnectivityState == ConnectionData.STATE_WIFI
 							&& preferences.getBoolean(context.getString(R.string.pref_cellularWifi), true))
 						sendNotification = true;
-					else if(lastConnectivityState == OFFLINE && currentConnectivityState == WIFI
+					else if(lastConnectivityState == ConnectionData.STATE_OFFLINE
+							&& currentConnectivityState == ConnectionData.STATE_WIFI
 							&& preferences.getBoolean(context.getString(R.string.pref_offlineWifi), true))
 						sendNotification = true;
-					else if(lastConnectivityState == OFFLINE && currentConnectivityState == MOBILE
+					else if(lastConnectivityState == ConnectionData.STATE_OFFLINE
+							&& currentConnectivityState == ConnectionData.STATE_MOBILE
 							&& preferences.getBoolean(context.getString(R.string.pref_offlineCellular), true))
 						sendNotification = true;
 
@@ -148,6 +134,8 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 					}
 
 					// send the message:
+					Parcel dataParcel = Parcel.obtain();
+					conData.toBundle().writeToParcel(dataParcel, 0);
 					if (!WearableApiHelper.sendMessage(googleApiClient, wearableNode.getId(), CommonPaths.CONNECTIVITY_CHANGED,
 							dataParcel.marshall(), 1000))
 						Log.e(LOGTAG, "onReceive (Thread=" + this.getName() + "): Failed to send Message");

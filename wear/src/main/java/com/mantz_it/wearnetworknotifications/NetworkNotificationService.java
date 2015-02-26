@@ -18,14 +18,13 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.wearable.Node;
-import com.mantz_it.common.CommonKeys;
 import com.mantz_it.common.CommonPaths;
+import com.mantz_it.common.ConnectionData;
 import com.mantz_it.common.WearableApiHelper;
 
 /**
@@ -207,7 +206,7 @@ public class NetworkNotificationService extends Service {
 		else {
 			// otherwise we show 'loading' or 'offline':
 			int iconRes = connected ? R.drawable.ic_launcher : R.drawable.offline;
-			String title = connected ? "loading..." : "offline";
+			String title = connected ? context.getString(R.string.loading) : context.getString(R.string.offline);
 			final Notification.Builder notificationBuilder = new Notification.Builder(context)
 					.setSmallIcon(iconRes)		// you have to include this
 					.setContentTitle(title)
@@ -257,53 +256,12 @@ public class NetworkNotificationService extends Service {
 		int cellularSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_cellularSignalStrengthUnit), "0"));
 		int wifiSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_wifiSignalStrengthUnit), "0"));
 
-		boolean wifiConnected = data.getInt(CommonKeys.WIFI_SPEED) > 0;
-		int wifiRssi = data.getInt(CommonKeys.WIFI_RSSI);
-		int cellularAsuLevel = data.getInt(CommonKeys.CELLULAR_ASU_LEVEL);
-		String networkName = data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR);
-		if(networkName.length() == 0) {
-			cellularAsuLevel = 0;
-		}
-		String signalStrength = "";
-		if(wifiConnected) {
-			networkName = data.getString(CommonKeys.WIFI_SSID).replace("\"", "");
-			if(wifiSignalStrengthUnit == 0)
-				signalStrength = "" + getWifiSignalStrengthPercentage(wifiRssi);
-			else if(wifiSignalStrengthUnit == 1)
-				signalStrength = "dBm";
-			else if(wifiSignalStrengthUnit == 2)
-				signalStrength = "" + wifiRssi;
-		}
-		else {
-			if(cellularAsuLevel < 0) {
-				networkName = "no service";
-				signalStrength = "";
-			} else if(cellularAsuLevel == 0) {
-				networkName = "emergency only";
-				signalStrength = "";
-			} else {
-				networkName = data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR);
-				if(cellularSignalStrengthUnit == 0)
-					signalStrength = "" + getCellularSignalStrenghPercentage(data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE), data.getInt(CommonKeys.CELLULAR_ASU_LEVEL));
-				else if(cellularSignalStrengthUnit == 1)
-					signalStrength = "" + data.getInt(CommonKeys.CELLULAR_DBM);
-				else if(cellularSignalStrengthUnit == 2)
-					signalStrength = "" + data.getInt(CommonKeys.CELLULAR_ASU_LEVEL);
-			}
-		}
-		int iconRes = getIndicatorIconRes(wifiConnected, wifiRssi, data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE), cellularAsuLevel);
+		ConnectionData conData = ConnectionData.fromBundle(context, data);
+		Log.d(LOGTAG, "updateNotification: " + conData.toString());
+
+		int iconRes = conData.getIndicatorIconRes();
 		if(iconRes < 0)
 			iconRes = R.drawable.ic_launcher;
-
-		String logMessage = "";
-		logMessage += CommonKeys.WIFI_SSID + "=" + data.getString(CommonKeys.WIFI_SSID) + "  ";
-		logMessage += CommonKeys.WIFI_RSSI + "=" + data.getInt(CommonKeys.WIFI_RSSI) + "  ";
-		logMessage += CommonKeys.WIFI_SPEED + "=" + data.getInt(CommonKeys.WIFI_SPEED) + "  ";
-		logMessage += CommonKeys.CELLULAR_NETWORK_OPERATOR + "=" + data.getString(CommonKeys.CELLULAR_NETWORK_OPERATOR) + "  ";
-		logMessage += CommonKeys.CELLULAR_NETWORK_TYPE + "=" + data.getInt(CommonKeys.CELLULAR_NETWORK_TYPE) + "  ";
-		logMessage += CommonKeys.CELLULAR_DBM + "=" + data.getInt(CommonKeys.CELLULAR_DBM) + "  ";
-		logMessage += CommonKeys.CELLULAR_ASU_LEVEL + "=" + data.getInt(CommonKeys.CELLULAR_ASU_LEVEL);
-		Log.d(LOGTAG, "updateNotification: " + logMessage);
 
 		// Prepare the large icon:
 		largeIconCanvas.drawColor(Color.BLACK);
@@ -312,9 +270,10 @@ public class NetworkNotificationService extends Service {
 
 		String title = "";
 		if(showSignalStrength)
-			title += signalStrength + " ";
+			title += conData.getPrimarySignalStrength(conData.isWifiConnected() ?
+					wifiSignalStrengthUnit : cellularSignalStrengthUnit) + " ";
 		if(showNetworkName)
-			title += networkName;
+			title += conData.getPrimaryNetworkName();
 		if(title.length() == 0)
 			title = "";
 
@@ -322,7 +281,7 @@ public class NetworkNotificationService extends Service {
 				.setLargeIcon(largeIcon)
 				.setSmallIcon(iconRes)		// you have to include this
 				.setContentTitle(title)
-				.setContentText(networkName)
+				.setContentText(conData.getPrimaryNetworkName())
 				.setPriority(2)
 				.setCategory(Notification.CATEGORY_STATUS);
 		if(vibrate)
@@ -341,252 +300,5 @@ public class NetworkNotificationService extends Service {
 
 		// Build the notification and issues it with notification manager.
 		notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-	}
-
-	/**
-	 * Will return the icon resource that fits to the given connection situation
-	 *
-	 * @param wifiConnected		true if wifi is currently connected
-	 * @param wifiRssi			RSSI (signal strength) of the wifi signal
-	 * @param networkType		type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
-	 * @param asuLevel			ASU level (signal strength) of the cellular signal
-	 * @return icon resource or -1 on error
-	 */
-	public static int getIndicatorIconRes(boolean wifiConnected, int wifiRssi, int networkType, int asuLevel) {
-		if(wifiConnected) {
-			int cellularStrength = getCellularSignalStrengh(networkType, asuLevel);
-			switch (getWifiSignalStrength(wifiRssi)) {
-				case 0:	//todo
-				case 1:
-					switch (cellularStrength) {
-						case 0:		return R.drawable.wifi_1_cellular_no_signal;
-						case 1:		return R.drawable.wifi_1_cellular_1;
-						case 2:		return R.drawable.wifi_1_cellular_2;
-						case 3:		return R.drawable.wifi_1_cellular_3;
-						case 4:		return R.drawable.wifi_1_cellular_4;
-						case 5:		return R.drawable.wifi_1_cellular_5;
-						default:	return -1;
-					}
-				case 2:
-					switch (cellularStrength) {
-						case 0:		return R.drawable.wifi_2_cellular_no_signal;
-						case 1:		return R.drawable.wifi_2_cellular_1;
-						case 2:		return R.drawable.wifi_2_cellular_2;
-						case 3:		return R.drawable.wifi_2_cellular_3;
-						case 4:		return R.drawable.wifi_2_cellular_4;
-						case 5:		return R.drawable.wifi_2_cellular_5;
-						default:	return -1;
-					}
-				case 3:
-					switch (cellularStrength) {
-						case 0:		return R.drawable.wifi_3_cellular_no_signal;
-						case 1:		return R.drawable.wifi_3_cellular_1;
-						case 2:		return R.drawable.wifi_3_cellular_2;
-						case 3:		return R.drawable.wifi_3_cellular_3;
-						case 4:		return R.drawable.wifi_3_cellular_4;
-						case 5:		return R.drawable.wifi_3_cellular_5;
-						default:	return -1;
-					}
-				case 4:
-					switch (cellularStrength) {
-						case 0:		return R.drawable.wifi_4_cellular_no_signal;
-						case 1:		return R.drawable.wifi_4_cellular_1;
-						case 2:		return R.drawable.wifi_4_cellular_2;
-						case 3:		return R.drawable.wifi_4_cellular_3;
-						case 4:		return R.drawable.wifi_4_cellular_4;
-						case 5:		return R.drawable.wifi_4_cellular_5;
-						default:	return -1;
-					}
-				case 5:
-					switch (cellularStrength) {
-						case 0:		return R.drawable.wifi_5_cellular_no_signal;
-						case 1:		return R.drawable.wifi_5_cellular_1;
-						case 2:		return R.drawable.wifi_5_cellular_2;
-						case 3:		return R.drawable.wifi_5_cellular_3;
-						case 4:		return R.drawable.wifi_5_cellular_4;
-						case 5:		return R.drawable.wifi_5_cellular_5;
-						default:	return -1;
-					}
-				default:	return -1;
-			}
-		} else {
-			switch (networkType) {
-				case 0:	// GSM
-					switch (getCellularSignalStrengh(networkType, asuLevel)) {
-						case 0:		return R.drawable.cellular_no_signal;
-						case 1:		return R.drawable.cellular_1;
-						case 2:		return R.drawable.cellular_2;
-						case 3:		return R.drawable.cellular_3;
-						case 4:		return R.drawable.cellular_4;
-						case 5:		return R.drawable.cellular_5;
-						default:	return -1;
-					}
-				case TelephonyManager.NETWORK_TYPE_GPRS:
-					switch (getCellularSignalStrengh(networkType, asuLevel)) {
-						case 0:		return R.drawable.cellular_no_signal;
-						case 1:		return R.drawable.cellular_1_g;
-						case 2:		return R.drawable.cellular_2_g;
-						case 3:		return R.drawable.cellular_3_g;
-						case 4:		return R.drawable.cellular_4_g;
-						case 5:		return R.drawable.cellular_5_g;
-						default:	return -1;
-					}
-				case TelephonyManager.NETWORK_TYPE_EDGE:
-					switch (getCellularSignalStrengh(networkType, asuLevel)) {
-						case 0:		return R.drawable.cellular_no_signal;
-						case 1:		return R.drawable.cellular_1_e;
-						case 2:		return R.drawable.cellular_2_e;
-						case 3:		return R.drawable.cellular_3_e;
-						case 4:		return R.drawable.cellular_4_e;
-						case 5:		return R.drawable.cellular_5_e;
-						default:	return -1;
-					}
-				case TelephonyManager.NETWORK_TYPE_HSDPA:
-				case TelephonyManager.NETWORK_TYPE_HSPA:
-				case TelephonyManager.NETWORK_TYPE_HSPAP:
-				case TelephonyManager.NETWORK_TYPE_HSUPA:
-				case TelephonyManager.NETWORK_TYPE_UMTS:
-					switch (getCellularSignalStrengh(networkType, asuLevel)) {
-						case 0:		return R.drawable.cellular_no_signal;
-						case 1:		return R.drawable.cellular_1_h;
-						case 2:		return R.drawable.cellular_2_h;
-						case 3:		return R.drawable.cellular_3_h;
-						case 4:		return R.drawable.cellular_4_h;
-						case 5:		return R.drawable.cellular_5_h;
-						default:	return -1;
-					}
-				case TelephonyManager.NETWORK_TYPE_LTE:
-					switch (getCellularSignalStrengh(networkType, asuLevel)) {
-						case 0:		return R.drawable.cellular_no_signal;
-						case 1:		return R.drawable.cellular_1_lte;
-						case 2:		return R.drawable.cellular_2_lte;
-						case 3:		return R.drawable.cellular_3_lte;
-						case 4:		return R.drawable.cellular_4_lte;
-						case 5:		return R.drawable.cellular_5_lte;
-						default:	return -1;
-					}
-				default:
-					return -1;
-			}
-		}
-	}
-
-	/**
-	 * Will return the signal strength of the cellular signal on a scale from 0 (no signal) to 5 (strong signal)
-	 *
-	 * @param networkType	type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
-	 * @param asuLevel		ASU level (signal strength) of the cellular signal
-	 * @return signal strength (0 - 5)
-	 */
-	public static int getCellularSignalStrengh(int networkType, int asuLevel) {
-		// http://www.lte-anbieter.info/technik/asu.php
-		switch (networkType) {
-			case 0:	// GSM
-			case TelephonyManager.NETWORK_TYPE_GPRS:
-			case TelephonyManager.NETWORK_TYPE_EDGE:
-				if(asuLevel < 1)
-					return 0;
-				if(asuLevel < 6)
-					return 1;
-				if(asuLevel < 11)
-					return 2;
-				if(asuLevel < 16)
-					return 3;
-				if(asuLevel < 27)
-					return 4;
-				return 5;
-			case TelephonyManager.NETWORK_TYPE_HSDPA:
-			case TelephonyManager.NETWORK_TYPE_HSPA:
-			case TelephonyManager.NETWORK_TYPE_HSPAP:
-			case TelephonyManager.NETWORK_TYPE_HSUPA:
-			case TelephonyManager.NETWORK_TYPE_UMTS:
-				if(asuLevel < 1)
-					return 0;
-				if(asuLevel < 6)
-					return 1;
-				if(asuLevel < 11)
-					return 2;
-				if(asuLevel < 16)
-					return 3;
-				if(asuLevel < 24)
-					return 4;
-				return 5;
-			case TelephonyManager.NETWORK_TYPE_LTE:
-				if(asuLevel < 10)
-					return 0;
-				if(asuLevel < 15)
-					return 1;
-				if(asuLevel < 30)
-					return 2;
-				if(asuLevel < 47)
-					return 3;
-				if(asuLevel < 71)
-					return 4;
-				return 5;
-		}
-		Log.e(LOGTAG, "getCellularSignalStrengh: unknown network type: " + networkType);
-		return -1;
-	}
-
-	/**
-	 * Will return the signal strength of the wifi signal on a scale from 0 (no signal) to 5 (strong signal)
-	 *
-	 * @param rssi		RSSI (signal strength) of the wifi signal
-	 * @return signal strength (0 - 5)
-	 */
-	public static int getWifiSignalStrength(int rssi) {
-		if(rssi < -100)
-			return 0;
-		if(rssi < -80)
-			return 1;
-		if(rssi < -68)
-			return 2;
-		if(rssi < -56)
-			return 3;
-		if(rssi < -50)
-			return 4;
-		return 5;
-	}
-
-	/**
-	 * Will convert the RSSI value to percent.
-	 *    -100 or lower will convert to 0%
-	 *    -40 will convert to 100%
-	 *    higher values will result in a percentage greater 100
-	 *
-	 * @param rssi		RSSI (signal strength) of the wifi signal
-	 * @return signal strength in percent
-	 */
-	public static int getWifiSignalStrengthPercentage(int rssi) {
-		int percent = (int)((rssi + 100) / 60f * 100);
-		if(percent < 0)
-			percent = 0;
-		return percent;
-	}
-
-	/**
-	 * Will convert the ASU value to percent.
-	 *
-	 * @param networkType	type of the cellular network (see TelephonyManager.NETWORK_TYPE_* )
-	 * @param asuLevel		ASU level (signal strength) of the cellular signal
-	 * @return signal strength in percent
-	 */
-	public static int getCellularSignalStrenghPercentage(int networkType, int asuLevel) {
-		// http://www.lte-anbieter.info/technik/asu.php
-		switch (networkType) {
-			case 0:	// GSM
-			case TelephonyManager.NETWORK_TYPE_GPRS:
-			case TelephonyManager.NETWORK_TYPE_EDGE:
-			case TelephonyManager.NETWORK_TYPE_HSDPA:
-			case TelephonyManager.NETWORK_TYPE_HSPA:
-			case TelephonyManager.NETWORK_TYPE_HSPAP:
-			case TelephonyManager.NETWORK_TYPE_HSUPA:
-			case TelephonyManager.NETWORK_TYPE_UMTS:
-				return (int)(asuLevel / 32f * 100);
-			case TelephonyManager.NETWORK_TYPE_LTE:
-				return (int)(asuLevel / 95f * 100);
-		}
-		Log.e(LOGTAG, "getCellularSignalStrenghPercentage: unknown network type: " + networkType);
-		return -1;
 	}
 }

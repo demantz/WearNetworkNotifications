@@ -36,6 +36,7 @@ import com.google.android.gms.wearable.Node;
 import com.google.android.gms.wearable.NodeApi;
 import com.google.android.gms.wearable.Wearable;
 import com.mantz_it.common.CommonPaths;
+import com.mantz_it.common.ConnectionData;
 import com.mantz_it.common.WearableApiHelper;
 
 import java.io.BufferedReader;
@@ -395,9 +396,8 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 		new Thread() {
 			public void run() {
 				// Gather connection data:
-				Bundle data = PhoneWearableListenerService.gatherConnectionData(SettingsActivity.this);
 				Parcel dataParcel = Parcel.obtain();
-				data.writeToParcel(dataParcel, 0);
+				ConnectionData.gatherConnectionData(SettingsActivity.this).toBundle().writeToParcel(dataParcel, 0);
 
 				// send the message:
 				if (!WearableApiHelper.sendMessage(googleApiClient, wearableNode.getId(), CommonPaths.CONNECTIVITY_CHANGED,
@@ -527,6 +527,6 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			Toast.makeText(this, getString(R.string.wearable_node_not_connected), Toast.LENGTH_LONG).show();
 			return;
 		}
-		PhoneWearableListenerService.updateSharedPreferences(googleApiClient, this, sharedPreferences);
+		WearableApiHelper.updateSharedPreferences(googleApiClient, this, sharedPreferences);
 	}
 }

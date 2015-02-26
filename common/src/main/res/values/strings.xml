@@ -61,4 +61,8 @@
     <string name="pref_cellularSignalStrengthUnit_title">Cellular signal strength unit</string>
     <string name="pref_cellularSignalStrengthUnit_summ">Unit is set to: %s</string>
     <string name="pref_cellularSignalStrengthUnit_default" translatable="false">0</string>
+    <string name="loading">loading...</string>
+    <string name="offline">offline</string>
+    <string name="noService">no service</string>
+    <string name="emergencyOnly">emergency only</string>
 </resources>
