@@ -1,5 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="pref_signalIndicatorPosition_entries">
+        <item>left</item>
+        <item>right</item>
+    </string-array>
+    <string-array translatable="false" name="pref_signalIndicatorPosition_values">
+        <item>left</item>
+        <item>right</item>
+    </string-array>
     <string-array name="pref_cellularSignalStrengthUnit_entries">
         <item>Percent</item>
         <item>dBm</item>

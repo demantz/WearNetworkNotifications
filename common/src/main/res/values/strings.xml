@@ -53,6 +53,10 @@
     <string name="pref_showSignalStrength_title">Show signal strength</string>
     <string name="pref_showSignalStrength_summ_on">Signal strength is displayed</string>
     <string name="pref_showSignalStrength_summ_off">Signal strength is not displayed</string>
+    <string name="pref_signalIndicatorPosition" translatable="false">pref_signalIndicatorPosition</string>
+    <string name="pref_signalIndicatorPosition_title">Signal indicator position</string>
+    <string name="pref_signalIndicatorPosition_summ">Signal indicator will be shown on the %s</string>
+    <string name="pref_signalIndicatorPosition_default" translatable="false">left</string>
     <string name="pref_wifiSignalStrengthUnit" translatable="false">pref_wifiSignalStrengthUnit</string>
     <string name="pref_wifiSignalStrengthUnit_title">Wifi signal strength unit</string>
     <string name="pref_wifiSignalStrengthUnit_summ">Unit is set to: %s</string>

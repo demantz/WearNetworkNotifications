@@ -78,33 +78,7 @@ public class WatchWearableListenerService extends WearableListenerService {
 			// UPDATE SHARED PREFERENCES:
 			if(dataEvent.getDataItem().getUri().getPath().equals(CommonPaths.SHARED_PREFERENCES)) {
 				DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
-				SharedPreferences.Editor edit = sharedPreferences.edit();
-
-				String key = getString(R.string.pref_showNotifications);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_vibration);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_wearableOffline);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_wearableOnline);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_showNetworkName);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_showSignalStrength);
-				edit.putBoolean(key, dataMap.getBoolean(key));
-
-				key = getString(R.string.pref_cellularSignalStrengthUnit);
-				edit.putString(key, dataMap.getString(key));
-
-				key = getString(R.string.pref_wifiSignalStrengthUnit);
-				edit.putString(key, dataMap.getString(key));
-
-				edit.apply();
+				WearableApiHelper.applyReceivedSharedPreferences(this, sharedPreferences, dataMap.toBundle());
 			}
 
 			// UPDATE CONNECTION DATA

@@ -19,6 +19,14 @@ Implemented Features
 * Automatic update of the notification when the wearable device wakes up
 * Available languages: English and German
 
+Android Permissions
+-------------------
+* VIBRATE: Obviously to make the watch vibrate on a notification (can be turned off)
+* ACCESS_NETWORK_STATE: Get information about the network connection status
+* ACCESS_WIFI_STATE: Get the wifi name and signal strength
+* READ_PHONE_STATE: Get information about the cellular connection
+* ACCESS_COARSE_LOCATION: To query the system for the currently connected
+  cell (to get the signal strength) this permission is also required
 
 Testet Devices
 --------------

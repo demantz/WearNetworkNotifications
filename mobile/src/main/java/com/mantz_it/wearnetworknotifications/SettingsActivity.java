@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
@@ -25,6 +26,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -159,7 +161,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			return true;
 		} else if (id == R.id.action_donate) {
 			// open in browser:
-			String donationUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=CWZL4HQC9SE86";
+			String donationUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W5ZPV42ZFJV3G";
 			Intent i = new Intent(Intent.ACTION_VIEW);
 			i.setData(Uri.parse(donationUrl));
 			startActivity(i);
@@ -411,9 +413,17 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	 * Will show a dialog that presents the current connection information
 	 */
 	public void showNetworkInformation() {
+		String networkInformationString = getNetworkInformation();
+		ConnectionData conData = ConnectionData.gatherConnectionData(this);
+		ImageView indicator = new ImageView(this);
+		indicator.setBackgroundColor(Color.BLACK);
+		indicator.setMinimumWidth(400);
+		indicator.setMinimumHeight(400);
+		indicator.setPadding(50,50,50,50);
+		indicator.setImageResource(conData.getIndicatorIconRes());
 		new AlertDialog.Builder(SettingsActivity.this)
-				.setTitle(getString(R.string.networkInformation))
-				.setMessage(getNetworkInformation())	// DEBUG
+				.setCustomTitle(indicator)
+				.setMessage(networkInformationString)
 				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// do nothing
@@ -421,6 +431,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 				})
 				.create()
 				.show();
+		Log.d(LOGTAG, "showNetworkInformation: " + networkInformationString.replace("\n", "    "));
 	}
 
 	// DEBUG
@@ -436,17 +447,17 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			stringBuilder.append("\n");
 		}
 
-		stringBuilder.append("Network Operator: " + tm.getNetworkOperator());
-		stringBuilder.append("Network Operator Name: " + tm.getNetworkOperatorName());
-		stringBuilder.append("Sim Operator Name: " + tm.getSimOperatorName());
-		stringBuilder.append("Phone Type: " + tm.getPhoneType());
-		stringBuilder.append("Cell State: " + tm.getCallState());
-		stringBuilder.append("Network Type: " + tm.getNetworkType());
-		stringBuilder.append("Data State: " + tm.getDataState());
+		stringBuilder.append("Network Operator: " + tm.getNetworkOperator() + "\n");
+		stringBuilder.append("Network Operator Name: " + tm.getNetworkOperatorName() + "\n");
+		stringBuilder.append("Sim Operator Name: " + tm.getSimOperatorName() + "\n");
+		stringBuilder.append("Phone Type: " + tm.getPhoneType() + "\n");
+		stringBuilder.append("Cell State: " + tm.getCallState() + "\n");
+		stringBuilder.append("Network Type: " + tm.getNetworkType() + "\n");
+		stringBuilder.append("Data State: " + tm.getDataState() + "\n");
 		CellInfo cellInfo = null;
 		if(tm.getAllCellInfo() != null && !tm.getAllCellInfo().isEmpty()) {
 			cellInfo = tm.getAllCellInfo().get(0);
-			stringBuilder.append("Cell toString: " + cellInfo.toString());
+			stringBuilder.append("Cell toString: " + cellInfo.toString() + "\n");
 		}
 		int dbm = Integer.MIN_VALUE;
 		int level = Integer.MIN_VALUE;
@@ -479,14 +490,14 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			level = cellInfoDetail.getCellSignalStrength().getLevel();
 			asuLevel = cellInfoDetail.getCellSignalStrength().getAsuLevel();
 		}
-		stringBuilder.append("dBm: " + dbm);
-		stringBuilder.append("Level: " + level);
-		stringBuilder.append("ASU Level: " + asuLevel);
+		stringBuilder.append("dBm: " + dbm + "\n");
+		stringBuilder.append("Level: " + level + "\n");
+		stringBuilder.append("ASU Level: " + asuLevel + "\n");
 
 		stringBuilder.append("\n");
 		//print("Frequency: " + wm.getConnectionInfo().getFrequency());
-		stringBuilder.append("Rssi: " + wm.getConnectionInfo().getRssi());
-		stringBuilder.append("ToString: " + wm.getConnectionInfo().toString());
+		stringBuilder.append("Rssi: " + wm.getConnectionInfo().getRssi() + "\n");
+		stringBuilder.append("ToString: " + wm.getConnectionInfo().toString() + "\n");
 
 		return stringBuilder.toString();
 	}
@@ -498,17 +509,17 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	 * @param stringBuilder		StringBuilder instance
 	 */
 	public void printNetworkInfo(NetworkInfo info, StringBuilder stringBuilder) {
-		stringBuilder.append("Type=" + info.getTypeName() + "(" + info.getType() + ")");
-		stringBuilder.append("SubType=" + info.getSubtypeName() + "(" + info.getSubtype() + ")");
-		stringBuilder.append("State=" + info.getState().toString());
-		stringBuilder.append("Reason=" + info.getReason());
-		stringBuilder.append("Available=" + info.isAvailable());
-		stringBuilder.append("Connected=" + info.isConnected());
-		stringBuilder.append("Roaming=" + info.isRoaming());
-		stringBuilder.append("Failover=" + info.isFailover());
-		stringBuilder.append("DetailedState=" + info.getDetailedState().toString());
-		stringBuilder.append("ExtraInfo=" + info.getExtraInfo());
-		stringBuilder.append("toString=" + info.toString());
+		stringBuilder.append("Type=" + info.getTypeName() + "(" + info.getType() + ")\n");
+		stringBuilder.append("SubType=" + info.getSubtypeName() + "(" + info.getSubtype() + ")\n");
+		stringBuilder.append("State=" + info.getState().toString() + "\n");
+		stringBuilder.append("Reason=" + info.getReason() + "\n");
+		stringBuilder.append("Available=" + info.isAvailable() + "\n");
+		stringBuilder.append("Connected=" + info.isConnected() + "\n");
+		stringBuilder.append("Roaming=" + info.isRoaming() + "\n");
+		stringBuilder.append("Failover=" + info.isFailover() + "\n");
+		stringBuilder.append("DetailedState=" + info.getDetailedState().toString() + "\n");
+		stringBuilder.append("ExtraInfo=" + info.getExtraInfo() + "\n");
+		stringBuilder.append("toString=" + info.toString() + "\n");
 	}
 
 	/**

@@ -67,8 +67,12 @@ public class SettingsFragment  extends PreferenceFragment implements SharedPrefe
 	 * Will go through each preference element and initialize/update the summary according to its value.
 	 */
 	public void updateSummaries() {
+		// Signal indicator position
+		ListPreference listPref = (ListPreference) findPreference(getString(R.string.pref_signalIndicatorPosition));
+		listPref.setSummary(getString(R.string.pref_signalIndicatorPosition_summ, listPref.getEntry()));
+
 		// Wifi signal strength unit
-		ListPreference listPref = (ListPreference) findPreference(getString(R.string.pref_wifiSignalStrengthUnit));
+		listPref = (ListPreference) findPreference(getString(R.string.pref_wifiSignalStrengthUnit));
 		listPref.setSummary(getString(R.string.pref_wifiSignalStrengthUnit_summ, listPref.getEntry()));
 
 		// Cellular signal strength unit

@@ -17,7 +17,6 @@
     <string name="chooseMailApp">Wählen sie eine Email App zum Versenden der Logdatei</string>
     <string name="action_sendTestNotification">Sende Testbenachrichtigung</string>
     <string name="action_showNetworkInformation">Zeige Netzwerkinformationen</string>
-    <string name="networkInformation">Netzwerkinformationen</string>
     <string name="ok">Ok</string>
     <string name="pref_view_category_title">Anzeige</string>
 </resources>

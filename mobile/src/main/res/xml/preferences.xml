@@ -81,6 +81,13 @@
             android:summaryOn="@string/pref_showNetworkName_summ_on"
             android:summaryOff="@string/pref_showNetworkName_summ_off"
             android:defaultValue="true" />
+        <ListPreference
+            android:key="@string/pref_signalIndicatorPosition"
+            android:title="@string/pref_signalIndicatorPosition_title"
+            android:dialogTitle="@string/pref_signalIndicatorPosition_title"
+            android:entries="@array/pref_signalIndicatorPosition_entries"
+            android:entryValues="@array/pref_signalIndicatorPosition_values"
+            android:defaultValue="@string/pref_signalIndicatorPosition_default" />
         <SwitchPreference
             android:key="@string/pref_showSignalStrength"
             android:title="@string/pref_showSignalStrength_title"

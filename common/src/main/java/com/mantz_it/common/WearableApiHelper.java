@@ -125,6 +125,9 @@ public class WearableApiHelper {
 		key = context.getString(R.string.pref_showSignalStrength);
 		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
 
+		key = context.getString(R.string.pref_signalIndicatorPosition);
+		dataMap.putString(key, sharedPreferences.getString(key, "left"));
+
 		key = context.getString(R.string.pref_cellularSignalStrengthUnit);
 		dataMap.putString(key, sharedPreferences.getString(key, "0"));
 
@@ -140,6 +143,39 @@ public class WearableApiHelper {
 
 		// also send fresh connection data:
 		updateConnectionData(googleApiClient, context);
+	}
+
+	public static void applyReceivedSharedPreferences(Context context, SharedPreferences sharedPreferences, Bundle data) {
+		SharedPreferences.Editor edit = sharedPreferences.edit();
+
+		String key = context.getString(R.string.pref_showNotifications);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_vibration);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_wearableOffline);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_wearableOnline);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_showNetworkName);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_showSignalStrength);
+		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_signalIndicatorPosition);
+		edit.putString(key, data.getString(key));
+
+		key = context.getString(R.string.pref_cellularSignalStrengthUnit);
+		edit.putString(key, data.getString(key));
+
+		key = context.getString(R.string.pref_wifiSignalStrengthUnit);
+		edit.putString(key, data.getString(key));
+
+		edit.apply();
 	}
 
 	/**

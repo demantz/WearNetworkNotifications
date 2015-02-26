@@ -253,6 +253,7 @@ public class NetworkNotificationService extends Service {
 		}
 		boolean showNetworkName = preferences.getBoolean(context.getString(R.string.pref_showNetworkName), true);
 		boolean showSignalStrength = preferences.getBoolean(context.getString(R.string.pref_showSignalStrength), true);
+		String signalIndicatorPosition = preferences.getString(context.getString(R.string.pref_signalIndicatorPosition), "left");
 		int cellularSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_cellularSignalStrengthUnit), "0"));
 		int wifiSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_wifiSignalStrengthUnit), "0"));
 
@@ -288,7 +289,7 @@ public class NetworkNotificationService extends Service {
 			notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
 		final Notification.WearableExtender wearableExtender = new Notification.WearableExtender()
 				.setContentIcon(iconRes)
-				.setContentIconGravity(Gravity.END)
+				.setContentIconGravity(signalIndicatorPosition.equals("left") ? Gravity.START : Gravity.END)
 				.setHintHideIcon(true);
 		notificationBuilder.extend(wearableExtender);
 
