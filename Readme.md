@@ -18,7 +18,7 @@ phone and it is also possible to only show the notification cards
 manually on the watch.
 
 
-![Wear Network Notifications](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/feature.png)
+![Wear Network Notifications](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/feature.png)
 
 
 Implemented Features
@@ -76,11 +76,11 @@ version 2 of the License, or (at your option) any later version.
 principal author: Dennis Mantz <dennis.mantz[at]googlemail.com>
 
 
-![Wear Network Notifications 1](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications1.png)
+![Wear Network Notifications 1](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications1.png)
 
-![Wear Network Notifications 2](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications2.png)
+![Wear Network Notifications 2](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications2.png)
 
-![Wear Network Notifications 3](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications3.png)
+![Wear Network Notifications 3](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications3.png)
 
 
 (photos by Dennis Mantz)
