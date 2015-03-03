@@ -65,6 +65,11 @@ Install the apk file on the handheld device and it will be synced to the
 wearable device automatically (by the Android system).
 
 
+Thanks
+------
+I want to thank Dominik Schürmann for developing a [Android Donation Fragment](https://github.com/dschuermann/android-donations-lib)
+which is used by this app!
+
 License
 -------
 This application is free software; you can redistribute it and/or
