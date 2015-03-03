@@ -76,11 +76,11 @@ version 2 of the License, or (at your option) any later version.
 principal author: Dennis Mantz <dennis.mantz[at]googlemail.com>
 
 
-![Wear Network Notifications 1](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications1.png)
+![Wear Network Notifications 1](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications1.jpg)
 
-![Wear Network Notifications 2](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications2.png)
+![Wear Network Notifications 2](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications2.jpg)
 
-![Wear Network Notifications 3](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications3.png)
+![Wear Network Notifications 3](https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications3.jpg)
 
 
 (photos by Dennis Mantz)
