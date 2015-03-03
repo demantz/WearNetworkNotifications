@@ -5,10 +5,20 @@ This is the repository of the Wear Network Notifications Application.
 It's a simply yet helpful app that will bring up notifications on connectivity
 state and signal strength on an Android Wear device.
 
+Just one glance to know if you are using Wifi, LTE, UMTS or if you are currently offline! 
+See the signl strength in percent or dBm and the current network name! 
+The information will automatically update every time the watch wakes 
+up from ambient mode.
 
-![Wear Network Notifications](http://....jpg)
+You even get a notification if your watch looses the Bluetooth connection 
+to the phone. This makes any 'forgot my phone' app unnecessary!
 
-(photo by Dennis Mantz)
+The notifications can be customized through the companion app on the 
+phone and it is also possible to only show the notification cards 
+manually on the watch.
+
+
+![Wear Network Notifications](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/feature.png)
 
 
 Implemented Features
@@ -27,6 +37,8 @@ Android Permissions
 * READ_PHONE_STATE: Get information about the cellular connection
 * ACCESS_COARSE_LOCATION: To query the system for the currently connected
   cell (to get the signal strength) this permission is also required
+* INTERNET and BILLING: For the donation dialog which uses PayPal, Google in-app purchases,
+  Flattr and Bitcoin.
 
 Testet Devices
 --------------
@@ -62,3 +74,13 @@ version 2 of the License, or (at your option) any later version.
 [http://www.gnu.org/licenses/gpl.html](http://www.gnu.org/licenses/gpl.html) GPL version 2 or higher
 
 principal author: Dennis Mantz <dennis.mantz[at]googlemail.com>
+
+
+![Wear Network Notifications 1](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications1.png)
+
+![Wear Network Notifications 2](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications2.png)
+
+![Wear Network Notifications 3](http://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/screenshots/WearNetworkNotifications3.png)
+
+
+(photos by Dennis Mantz)

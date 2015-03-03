@@ -23,10 +23,13 @@ import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
+import android.text.Html;
+import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
@@ -160,12 +163,15 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			sendTestNotification();
 			return true;
 		} else if (id == R.id.action_donate) {
-			// open in browser:
-			String donationUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W5ZPV42ZFJV3G";
-			Intent i = new Intent(Intent.ACTION_VIEW);
-			i.setData(Uri.parse(donationUrl));
-			startActivity(i);
+//			// open in browser:
+//			String donationUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W5ZPV42ZFJV3G";
+//			Intent i = new Intent(Intent.ACTION_VIEW);
+//			i.setData(Uri.parse(donationUrl));
+//			startActivity(i);
+			startActivity(new Intent(this, DonationActivity.class));
 			return true;
+		} else if (id == R.id.action_about) {
+			showAboutDialog();
 		}
 
 		return super.onOptionsItemSelected(item);
@@ -530,14 +536,28 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	public void sendPreferences(SharedPreferences sharedPreferences) {
 		if(!googleApiClient.isConnected()) {
 			Log.e(LOGTAG, "sendPreferences: google api client not connected!");
-			Toast.makeText(this, getString(R.string.googleApiClient_not_connected), Toast.LENGTH_LONG).show();
 			return;
 		}
 		if(wearableNode == null) {
 			Log.e(LOGTAG, "sendPreferences: wearable node not connected!");
-			Toast.makeText(this, getString(R.string.wearable_node_not_connected), Toast.LENGTH_LONG).show();
 			return;
 		}
 		WearableApiHelper.updateSharedPreferences(googleApiClient, this, sharedPreferences);
+	}
+
+	public void showAboutDialog() {
+		AlertDialog dialog = new AlertDialog.Builder(SettingsActivity.this)
+				.setTitle(Html.fromHtml(getString(R.string.about_title)))
+				.setMessage(Html.fromHtml(getString(R.string.about_msg_body)))
+				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
+					public void onClick(DialogInterface dialog, int whichButton) {
+						// Do nothing
+					}
+				})
+				.create();
+		dialog.show();
+
+		// make links clickable:
+		((TextView)dialog.findViewById(android.R.id.message)).setMovementMethod(LinkMovementMethod.getInstance());
 	}
 }

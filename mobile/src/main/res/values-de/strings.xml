@@ -18,5 +18,44 @@
     <string name="action_sendTestNotification">Sende Testbenachrichtigung</string>
     <string name="action_showNetworkInformation">Zeige Netzwerkinformationen</string>
     <string name="ok">Ok</string>
-    <string name="pref_view_category_title">Anzeige</string>
+    <string name="donate">Spenden</string>
+    <string name="action_about">Über</string>
+    <string name="about_title"><![CDATA[<h1>Über die App</h1>]]></string>
+    <string name="about_msg_body"><![CDATA[
+Copyright &#169; 2015 Dennis Mantz<br /><br />
+Bitte unterstütze meine Arbeit durch eine kleine Spende!
+
+<h1>Bug gefunden?</h1>
+Wenn du einen Bug oder einen Übersetzungsfehler findest oder ein
+Feature-Wunsch hast, benutze bitte die GitHub Seite des Projekts:<br />
+<a href=https://github.com/demantz/WearNetworkNotifications/issues>
+https://github.com/demantz/WearNetworkNotifications/issues</a>
+<br /><br />
+Alternativ kannst du mir auch eine Email schreiben an
+<a href=mailto:dennis.mantz@googlemail.com>dennis.mantz@googlemail.com</a>.
+
+<h1>Danke</h1>
+Ich bedanke mich bei Dominik Schürmann für sein
+<a href=https://github.com/dschuermann/android-donations-lib>Android Donation Fragment</a>
+das in dieser App verwendet wird!
+
+<h1>Lizenz</h1>
+<a href=http://www.gnu.org/licenses/gpl.html>GPL version 2 or higher</a>
+<br /><br />
+<small>This application is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+<br /><br />
+This application is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+<br /><br />
+You should have received a copy of the GNU General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</small>
+<br /><br />
+Schau in den Source Code auf <a href=https://github.com/demantz/WearNetworkNotifications>GitHub</a>!
+]]></string>
 </resources>

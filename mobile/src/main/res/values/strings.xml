@@ -1,9 +1,11 @@
 <resources>
+    <string name="donate">Donate</string>
     <string name="action_sendTestNotification">Send test notification</string>
     <string name="action_showNetworkInformation">Show network information</string>
     <string name="action_showHandheldLog">Show handheld log</string>
     <string name="action_showWearableLog">Show wearable log</string>
     <string name="action_donate">Donate</string>
+    <string name="action_about">About</string>
     <string name="chooseMailApp">Choose the App to share the log file</string>
     <string name="googleApiClient_not_connected">The google API client is not connected!</string>
     <string name="wearable_node_not_connected">The wearable node is not connected!</string>
@@ -15,4 +17,43 @@
     <string name="cancel">Cancel</string>
     <string name="ok">Ok</string>
     <string name="wearable_log">Wearable Log</string>
+    <string name="donation_paypal_item" translatable="false">Donation for WearNetworkNotifications</string>
+    <string name="about_title"><![CDATA[<h1>About the App</h1>]]></string>
+    <string name="about_msg_body"><![CDATA[
+Copyright &#169; 2015 Dennis Mantz<br /><br />
+Please support my work by making a small donation!
+
+<h1>Reporting Bugs</h1>
+If you find any bugs or translation mistakes or if you want to request
+a new feature please use the GitHub page of the project:<br />
+<a href=https://github.com/demantz/WearNetworkNotifications/issues>
+https://github.com/demantz/WearNetworkNotifications/issues</a>
+<br /><br />
+Alternatively you could write me an email to
+<a href=mailto:dennis.mantz@googlemail.com>dennis.mantz@googlemail.com</a>.
+
+<h1>Thanks</h1>
+I want to thank Dominik Schürmann for developing a
+<a href=https://github.com/dschuermann/android-donations-lib>Android Donation Fragment</a>
+which is used by this app!
+
+<h1>License</h1>
+<a href=http://www.gnu.org/licenses/gpl.html>GPL version 2 or higher</a>
+<br /><br />
+<small>This application is free software; you can redistribute it and/or
+modify it under the terms of the GNU General Public
+License as published by the Free Software Foundation; either
+version 2 of the License, or (at your option) any later version.
+<br /><br />
+This application is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+<br /><br />
+You should have received a copy of the GNU General Public
+License along with this library; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA</small>
+<br /><br />
+Get the source code of the app here on <a href=https://github.com/demantz/WearNetworkNotifications>GitHub</a>!
+]]></string>
 </resources>

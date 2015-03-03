@@ -75,6 +75,11 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 					// Gather connection data:
 					ConnectionData conData = ConnectionData.gatherConnectionData(context);
 
+					// check if the last connectivity state variable is valid. load from prefs if not:
+					if(lastConnectivityState == ConnectionData.STATE_INVALID)
+						lastConnectivityState = preferences.getInt(context.getString(
+								R.string.pref_lastConnectivityState), ConnectionData.STATE_INVALID);
+
 					// determine the current state:
 					int currentConnectivityState = conData.getConnectionState();
 
@@ -110,7 +115,12 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 							&& preferences.getBoolean(context.getString(R.string.pref_offlineCellular), true))
 						sendNotification = true;
 
+					// save the last connectivity state:
 					lastConnectivityState = currentConnectivityState;
+					SharedPreferences.Editor edit = preferences.edit();
+					edit.putInt(context.getString(R.string.pref_lastConnectivityState), lastConnectivityState);
+					edit.apply();
+
 					if(!sendNotification) {
 						Log.d(LOGTAG, "onReceive (Thread=" + this.getName() + "): No notification will be send according to the prefs.");
 						return;
