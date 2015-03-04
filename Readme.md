@@ -51,6 +51,8 @@ Known Issues
 * If the notification is swiped away immediately after the device wakes
   up, the notification might come back because the updated notification
   shows up.
+* The Android system doesn't send a Broadcast after losing network connection
+  (WIFI --> OFFLINE  and  MOBILE --> OFFLINE aren't working)
 
 
 Installation / Usage
