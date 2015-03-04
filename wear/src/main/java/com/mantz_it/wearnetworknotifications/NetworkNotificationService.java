@@ -55,7 +55,7 @@ import com.mantz_it.common.WearableApiHelper;
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class NetworkNotificationService extends Service {
-	private static final String LOGTAG = "NetworkNotificationService";
+	private static final String LOGTAG = "NetworkNotificationS";
 	public static final String ACTION_SHOW_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_NOTIFICATION";
 	public static final String ACTION_NOW_ONLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_ONLINE";
 	public static final String ACTION_NOW_OFFLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_OFFLINE";
@@ -271,7 +271,7 @@ public class NetworkNotificationService extends Service {
 
 		String title = "";
 		if(showSignalStrength)
-			title += conData.getPrimarySignalStrength(conData.isWifiConnected() ?
+			title += conData.getPrimarySignalStrength(conData.getConnectionState() == ConnectionData.STATE_WIFI ?
 					wifiSignalStrengthUnit : cellularSignalStrengthUnit) + " ";
 		if(showNetworkName)
 			title += conData.getPrimaryNetworkName();

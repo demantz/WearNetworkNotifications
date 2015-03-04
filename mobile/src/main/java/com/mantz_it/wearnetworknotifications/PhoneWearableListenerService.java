@@ -41,7 +41,7 @@ import com.mantz_it.common.WearableApiHelper;
  */
 public class PhoneWearableListenerService extends WearableListenerService {
 
-	private static final String LOGTAG = "PhoneWearableListenerService";
+	private static final String LOGTAG = "PhoneWearableLS";
 
 	@Override
 	public void onCreate() {

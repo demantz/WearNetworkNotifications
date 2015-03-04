@@ -15,8 +15,6 @@ import com.mantz_it.common.CommonPaths;
 import com.mantz_it.common.ConnectionData;
 import com.mantz_it.common.WearableApiHelper;
 
-import java.util.Date;
-
 /**
  * <h1>Wear Network Notifications - Connectivity Broadcast Receiver</h1>
  *
@@ -45,7 +43,7 @@ import java.util.Date;
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA
  */
 public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
-	private static final String LOGTAG = "ConnectivityBroadcastReceiver";
+	private static final String LOGTAG = "ConnectivityBR";
 	private static int lastConnectivityState = ConnectionData.STATE_INVALID;
 
 	/**
@@ -57,8 +55,9 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 	 */
 	@Override
 	public void onReceive(final Context context, Intent intent) {
-		Log.d(LOGTAG, "onReceive: " + intent.toString());
-		if(!intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")){
+		if(intent.getAction().equals("android.net.wifi.WIFI_STATE_CHANGED")) {
+			Log.d(LOGTAG, "onReceive: " + intent.toString());	// debug
+		} else if(!intent.getAction().equals("android.net.conn.CONNECTIVITY_CHANGE")){
 			Log.w(LOGTAG, "onReceive: received unknown intent: " + intent.getAction());
 			return;
 		}
@@ -83,7 +82,7 @@ public class ConnectivityBroadcastReceiver extends BroadcastReceiver {
 					// determine the current state:
 					int currentConnectivityState = conData.getConnectionState();
 
-					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): " + (new Date()).toString() + " Event=" + extras.get("networkInfo"));
+					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): " + "CONDATA=" + conData.toString() + "  --  Event=" + extras.get("networkInfo"));
 					Log.i(LOGTAG, "onReceive (Thread=" + this.getName() + "): ConnectifityState: "
 							+ ConnectionData.getConnectionStateName(lastConnectivityState)
 							+ " ==> " + conData.getConnectionStateName());

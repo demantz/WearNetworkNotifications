@@ -8,8 +8,6 @@
     </facet>
   </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
-    <output url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/build/classes/main" />
-    <output-test url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/build/classes/test" />
     <exclude-output />
     <content url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications">
       <excludeFolder url="file:///media/dennis/DATEN/Dropbox-Linux/Dropbox/Dennis/PC_Programmieren/Android/WearNetworkNotifications/.gradle" />

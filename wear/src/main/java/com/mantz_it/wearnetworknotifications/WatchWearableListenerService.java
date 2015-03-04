@@ -55,7 +55,7 @@ import java.io.InputStreamReader;
  */
 public class WatchWearableListenerService extends WearableListenerService {
 
-	private static final String LOGTAG = "WatchWearableListenerService";
+	private static final String LOGTAG = "WatchWearableLS";
 
 	@Override
 	public void onCreate() {

@@ -20,6 +20,7 @@
     <string name="donation_paypal_item" translatable="false">Donation for WearNetworkNotifications</string>
     <string name="about_title"><![CDATA[<h1>About the App</h1>]]></string>
     <string name="about_msg_body"><![CDATA[
+Wear Network Notifications %s <br /><br />
 Copyright &#169; 2015 Dennis Mantz<br /><br />
 Please support my work by making a small donation!
 

@@ -9,6 +9,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -86,10 +87,18 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	private Node wearableNode;
 	private ProgressDialog progressDialog;
 	private SharedPreferences preferences;
+	private String versionName = "";
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
+
+		// Get version name:
+		try {
+			versionName = getPackageManager().getPackageInfo(getPackageName(), 0).versionName;
+		} catch (PackageManager.NameNotFoundException e) {
+			e.printStackTrace();
+		}
 
 		// create the SettingsFragment and place it inside the activity:
 		SettingsFragment settingsFragment = new SettingsFragment();
@@ -267,7 +276,8 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 									public void onClick(DialogInterface dialog, int whichButton) {
 										// Invoke email app:
 										Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "dennis.mantz@googlemail.com", null));
-										intent.putExtra(Intent.EXTRA_SUBJECT, "Wear Guitar Tuner log report (wearable)");
+										intent.putExtra(Intent.EXTRA_SUBJECT, "Wear Network Notifications "
+												+ versionName + " log report (wearable)");
 										intent.putExtra(Intent.EXTRA_TEXT, log);
 										startActivity(Intent.createChooser(intent, getString(R.string.chooseMailApp)));
 									}
@@ -373,7 +383,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// Invoke email app:
 						Intent intent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", "dennis.mantz@googlemail.com", null));
-						intent.putExtra(Intent.EXTRA_SUBJECT, "Wear Guitar Tuner log report (handheld)");
+						intent.putExtra(Intent.EXTRA_SUBJECT, "Wear Network Notifications " + versionName +" log report (handheld)");
 						intent.putExtra(Intent.EXTRA_TEXT, logString);
 						startActivity(Intent.createChooser(intent, getString(R.string.chooseMailApp)));
 					}
@@ -546,9 +556,10 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	}
 
 	public void showAboutDialog() {
+
 		AlertDialog dialog = new AlertDialog.Builder(SettingsActivity.this)
 				.setTitle(Html.fromHtml(getString(R.string.about_title)))
-				.setMessage(Html.fromHtml(getString(R.string.about_msg_body)))
+				.setMessage(Html.fromHtml(getString(R.string.about_msg_body, versionName)))
 				.setPositiveButton(getString(R.string.ok), new DialogInterface.OnClickListener() {
 					public void onClick(DialogInterface dialog, int whichButton) {
 						// Do nothing

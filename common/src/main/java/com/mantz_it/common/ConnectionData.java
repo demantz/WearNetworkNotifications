@@ -2,6 +2,8 @@ package com.mantz_it.common;
 
 
 import android.content.Context;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.telephony.CellInfo;
@@ -12,8 +14,11 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
+import java.util.Date;
+
 public class ConnectionData {
 	private static final String LOGTAG = "ConnectionData";
+	public static final String STATE = "STATE";
 	public static final String WIFI_SSID = "WIFI_SSID";
 	public static final String WIFI_RSSI = "WIFI_RSSI";
 	public static final String WIFI_SPEED = "WIFI_SPEED";
@@ -33,6 +38,7 @@ public class ConnectionData {
 	public static final int STATE_WIFI		= 3;
 
 	private Context context;
+	private int state;
 	private String wifiSsid;
 	private int wifiRssi;
 	private int wifiSpeed;
@@ -81,6 +87,22 @@ public class ConnectionData {
 		data.putInt(CELLULAR_DBM, dbm);
 		data.putInt(CELLULAR_ASU_LEVEL, asuLevel);
 
+		// Basic connectivity data:
+		ConnectivityManager cm = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
+		int state = STATE_INVALID;
+		if(networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
+				&& networkInfo.isAvailable() && networkInfo.isConnected() && wm.getConnectionInfo().getLinkSpeed() >= 0) {
+			state = STATE_WIFI;
+		} else if(networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE
+				&& networkInfo.isAvailable() && networkInfo.isConnected() && asuLevel >= 0
+				&& tm.getNetworkOperatorName().length() > 0 && tm.getNetworkType() != 0) {
+			state = STATE_MOBILE;
+		} else {
+			state = STATE_OFFLINE;
+		}
+		data.putInt(STATE, state);
+
 		// also add a timestamp:
 		data.putLong(TIMESTAMP, System.currentTimeMillis());
 
@@ -93,6 +115,7 @@ public class ConnectionData {
 
 	public Bundle toBundle() {
 		Bundle bundle = new Bundle();
+		bundle.putInt(STATE, state);
 		bundle.putString(WIFI_SSID, wifiSsid);
 		bundle.putInt(WIFI_RSSI, wifiRssi);
 		bundle.putInt(WIFI_SPEED, wifiSpeed);
@@ -106,6 +129,7 @@ public class ConnectionData {
 
 	private ConnectionData(Context context, Bundle connectionData) {
 		this.context = context;
+		state = connectionData.getInt(STATE);
 		wifiSsid = connectionData.getString(WIFI_SSID);
 		wifiRssi = connectionData.getInt(WIFI_RSSI);
 		wifiSpeed = connectionData.getInt(WIFI_SPEED);
@@ -148,23 +172,24 @@ public class ConnectionData {
 		return timestamp;
 	}
 
-	public boolean isWifiConnected() {
-		return wifiSpeed > 0;
-	}
+//	public boolean isWifiConnected() {
+//		return wifiSpeed > 0;
+//	}
 
 	public int getConnectionState() {
-		if (isWifiConnected()) {
-			return STATE_WIFI;
-		} else {
-			// WIFI is disconnected
-			if (cellularNetworkOperator.length() == 0 || cellularNetworkType == 0) {
-				// CELLULAR is also disconnected. we are offline.
-				return STATE_OFFLINE;
-			} else {
-				// CELLULAR is connected
-				return STATE_MOBILE;
-			}
-		}
+		return state;
+//		if (isWifiConnected()) {
+//			return STATE_WIFI;
+//		} else {
+//			// WIFI is disconnected
+//			if (cellularNetworkOperator.length() == 0 || cellularNetworkType == 0) {
+//				// CELLULAR is also disconnected. we are offline.
+//				return STATE_OFFLINE;
+//			} else {
+//				// CELLULAR is connected
+//				return STATE_MOBILE;
+//			}
+//		}
 	}
 
 	public static String getConnectionStateName(int connectionState) {
@@ -177,21 +202,34 @@ public class ConnectionData {
 	}
 
 	public String getPrimaryNetworkName() {
-		if(isWifiConnected()) {
-			return getWifiSsid();
-		}
-		else {
-			if(cellularAsuLevel < 0)
-				return context.getString(R.string.noService);
-			else if(cellularAsuLevel == 0)
-				return context.getString(R.string.emergencyOnly);
-			else
+		switch (state) {
+			case STATE_WIFI:
+				return getWifiSsid();
+			case STATE_MOBILE:
 				return getCellularNetworkOperator();
+			case STATE_OFFLINE:
+				if(cellularAsuLevel < 0)
+					return context.getString(R.string.noService);
+				else
+					return context.getString(R.string.emergencyOnly);
+			default:
+				return "";
 		}
+//		if(isWifiConnected()) {
+//			return getWifiSsid();
+//		}
+//		else {
+//			if(cellularAsuLevel < 0)
+//				return context.getString(R.string.noService);
+//			else if(cellularAsuLevel == 0)
+//				return context.getString(R.string.emergencyOnly);
+//			else
+//				return getCellularNetworkOperator();
+//		}
 	}
 
 	public String getPrimarySignalStrength(int unit) {
-		if(isWifiConnected()) {
+		if(state == STATE_WIFI) {
 			if(unit == UNIT_PERCENT)
 				return "" + getWifiSignalStrengthPercentage();
 			else if(unit == UNIT_DBM)
@@ -217,10 +255,12 @@ public class ConnectionData {
 
 	public String toString() {
 		String str = "";
-		str += WIFI_SSID + "=" + wifiSsid + "  ";
+		str += TIMESTAMP + "=" + (new Date(timestamp)).toString() + " ";
+		str += STATE + "=" + getConnectionStateName() + " ";
+		str += WIFI_SSID + "=" + (wifiSsid.length() == 0 ? "''" : wifiSsid) + "  ";
 		str += WIFI_RSSI + "=" + wifiRssi + "  ";
 		str += WIFI_SPEED + "=" + wifiSpeed + "  ";
-		str += CELLULAR_NETWORK_OPERATOR + "=" + cellularNetworkOperator + "  ";
+		str += CELLULAR_NETWORK_OPERATOR + "=" + (cellularNetworkOperator.length() == 0 ? "''" : cellularNetworkOperator) + "  ";
 		str += CELLULAR_NETWORK_TYPE + "=" + cellularNetworkType + "  ";
 		str += CELLULAR_DBM + "=" + cellularDBm + "  ";
 		str += CELLULAR_ASU_LEVEL + "=" + cellularAsuLevel;
@@ -233,7 +273,7 @@ public class ConnectionData {
 	 * @return icon resource or -1 on error
 	 */
 	public int getIndicatorIconRes() {
-		if(isWifiConnected()) {
+		if(state == STATE_WIFI) {
 			int cellularStrength = getCellularSignalStrengh();
 			switch (getWifiSignalStrength()) {
 				case 0:	//todo
