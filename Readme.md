@@ -53,6 +53,12 @@ Known Issues
   shows up.
 * The Android system doesn't send a Broadcast after losing network connection
   (WIFI --> OFFLINE  and  MOBILE --> OFFLINE aren't working)
+* On my Nexus 5 with Lollipop: After the Nexus 5 connects to a Wifi network
+  while locked and screen is of, the Android system reports: wifi-speed==-1 
+  and wifi-rssi==-127 until I turn on the screen of the Nexus 5
+  (see: https://code.google.com/p/android/issues/detail?id=38483)
+  I worked around this issue by using the RSSI from the last wifi scan
+  results in this case. Not ideal, but what should I do?
 
 
 Installation / Usage

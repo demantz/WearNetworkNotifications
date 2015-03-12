@@ -4,6 +4,7 @@ package com.mantz_it.common;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.telephony.CellInfo;
@@ -15,6 +16,7 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import java.util.Date;
+import java.util.List;
 
 public class ConnectionData {
 	private static final String LOGTAG = "ConnectionData";
@@ -22,6 +24,7 @@ public class ConnectionData {
 	public static final String WIFI_SSID = "WIFI_SSID";
 	public static final String WIFI_RSSI = "WIFI_RSSI";
 	public static final String WIFI_SPEED = "WIFI_SPEED";
+	public static final String WIFI_RSSI_FROM_SCAN_RESULT = "WIFI_RSSI_FROM_SCAN_RESULT";
 	public static final String CELLULAR_NETWORK_OPERATOR = "CELLULAR_NETWORK_OPERATOR";
 	public static final String CELLULAR_NETWORK_TYPE = "CELLULAR_NETWORK_TYPE";
 	public static final String CELLULAR_DBM = "CELLULAR_DBM";
@@ -41,6 +44,7 @@ public class ConnectionData {
 	private int state;
 	private String wifiSsid;
 	private int wifiRssi;
+	private boolean wifiRssiFromScanResult;
 	private int wifiSpeed;
 	private String cellularNetworkOperator;
 	private int cellularNetworkType;
@@ -53,9 +57,39 @@ public class ConnectionData {
 
 		// Wifi data
 		WifiManager wm = (WifiManager) context.getSystemService(Context.WIFI_SERVICE);
-		data.putString(WIFI_SSID, wm.getConnectionInfo().getSSID());
-		data.putInt(WIFI_RSSI, wm.getConnectionInfo().getRssi());
-		data.putInt(WIFI_SPEED, wm.getConnectionInfo().getLinkSpeed());
+		String ssid = wm.getConnectionInfo().getSSID();
+		String bssid = wm.getConnectionInfo().getBSSID();
+		int rssi = wm.getConnectionInfo().getRssi();
+		boolean rssiFromScanResult = false;
+		int speed = wm.getConnectionInfo().getLinkSpeed();
+
+		// A little work-around.
+		// Problem: After the phone connects to a wifi network while the screen is turned off,
+		// the ConnectionInfo will report speed==-1 and rssi==-127 until the screen is turned on
+		// once (Nexus 5 with 5.0.1)
+		// Work-around: If this bug happens we get the rssi from the last scan results:
+		if(speed < 0 && ssid != null && ssid.length() > 0) {
+			List<ScanResult> scanResultList = wm.getScanResults();
+			if(scanResultList != null) {
+				for(ScanResult result: scanResultList) {
+					if(result.BSSID.equals(bssid)) {
+						rssi = result.level;
+						Log.d(LOGTAG, "gatherConnectionData: SSID is set but Linkspeed is -1 and ScanResult Level is:"
+								+ result.level);
+						rssiFromScanResult = true;
+					}
+				}
+				if(!rssiFromScanResult)
+					Log.d(LOGTAG, "gatherConnectionData: SSID is set but Linkspeed is -1 and ScanResults don't contain BSSID ("
+							+ wm.getConnectionInfo().getBSSID() + ")!");
+			} else {
+				Log.d(LOGTAG, "gatherConnectionData: SSID is set but Linkspeed is -1 and ScanResults are null!");
+			}
+		}
+		data.putString(WIFI_SSID, ssid);
+		data.putInt(WIFI_RSSI, rssi);
+		data.putBoolean(WIFI_RSSI_FROM_SCAN_RESULT, rssiFromScanResult);
+		data.putInt(WIFI_SPEED, speed);
 
 		// Cellular data
 		TelephonyManager tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
@@ -92,7 +126,7 @@ public class ConnectionData {
 		NetworkInfo networkInfo = cm.getActiveNetworkInfo();
 		int state = STATE_INVALID;
 		if(networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_WIFI
-				&& networkInfo.isAvailable() && networkInfo.isConnected() && wm.getConnectionInfo().getLinkSpeed() >= 0) {
+				&& networkInfo.isAvailable() && networkInfo.isConnected()) {
 			state = STATE_WIFI;
 		} else if(networkInfo != null && networkInfo.getType() == ConnectivityManager.TYPE_MOBILE
 				&& networkInfo.isAvailable() && networkInfo.isConnected() && asuLevel >= 0
@@ -118,6 +152,7 @@ public class ConnectionData {
 		bundle.putInt(STATE, state);
 		bundle.putString(WIFI_SSID, wifiSsid);
 		bundle.putInt(WIFI_RSSI, wifiRssi);
+		bundle.putBoolean(WIFI_RSSI_FROM_SCAN_RESULT, wifiRssiFromScanResult);
 		bundle.putInt(WIFI_SPEED, wifiSpeed);
 		bundle.putString(CELLULAR_NETWORK_OPERATOR, cellularNetworkOperator);
 		bundle.putInt(CELLULAR_NETWORK_TYPE, cellularNetworkType);
@@ -132,6 +167,7 @@ public class ConnectionData {
 		state = connectionData.getInt(STATE);
 		wifiSsid = connectionData.getString(WIFI_SSID);
 		wifiRssi = connectionData.getInt(WIFI_RSSI);
+		wifiRssiFromScanResult = connectionData.getBoolean(WIFI_RSSI_FROM_SCAN_RESULT);
 		wifiSpeed = connectionData.getInt(WIFI_SPEED);
 		cellularNetworkOperator = connectionData.getString(CELLULAR_NETWORK_OPERATOR);
 		cellularNetworkType = connectionData.getInt(CELLULAR_NETWORK_TYPE);
@@ -146,6 +182,10 @@ public class ConnectionData {
 
 	public int getWifiRssi() {
 		return wifiRssi;
+	}
+
+	public boolean isWifiRssiFromScanResult() {
+		return wifiRssiFromScanResult;
 	}
 
 	public int getWifiSpeed() {
@@ -172,24 +212,8 @@ public class ConnectionData {
 		return timestamp;
 	}
 
-//	public boolean isWifiConnected() {
-//		return wifiSpeed > 0;
-//	}
-
 	public int getConnectionState() {
 		return state;
-//		if (isWifiConnected()) {
-//			return STATE_WIFI;
-//		} else {
-//			// WIFI is disconnected
-//			if (cellularNetworkOperator.length() == 0 || cellularNetworkType == 0) {
-//				// CELLULAR is also disconnected. we are offline.
-//				return STATE_OFFLINE;
-//			} else {
-//				// CELLULAR is connected
-//				return STATE_MOBILE;
-//			}
-//		}
 	}
 
 	public static String getConnectionStateName(int connectionState) {
@@ -215,27 +239,17 @@ public class ConnectionData {
 			default:
 				return "";
 		}
-//		if(isWifiConnected()) {
-//			return getWifiSsid();
-//		}
-//		else {
-//			if(cellularAsuLevel < 0)
-//				return context.getString(R.string.noService);
-//			else if(cellularAsuLevel == 0)
-//				return context.getString(R.string.emergencyOnly);
-//			else
-//				return getCellularNetworkOperator();
-//		}
 	}
 
 	public String getPrimarySignalStrength(int unit) {
 		if(state == STATE_WIFI) {
+			String suffix = wifiRssiFromScanResult ? "*" : "";
 			if(unit == UNIT_PERCENT)
-				return "" + getWifiSignalStrengthPercentage();
+				return "" + getWifiSignalStrengthPercentage() + suffix;
 			else if(unit == UNIT_DBM)
 				return "dBm";		// TODO replace with actual calculation
 			else if(unit == UNIT_RSSI)
-				return "" + wifiRssi;
+				return "" + wifiRssi + suffix;
 		}
 		else {
 			if(cellularAsuLevel <= 0) {
@@ -257,8 +271,8 @@ public class ConnectionData {
 		String str = "";
 		str += TIMESTAMP + "=" + (new Date(timestamp)).toString() + " ";
 		str += STATE + "=" + getConnectionStateName() + " ";
-		str += WIFI_SSID + "=" + (wifiSsid.length() == 0 ? "''" : wifiSsid) + "  ";
-		str += WIFI_RSSI + "=" + wifiRssi + "  ";
+		str += WIFI_SSID + "=" + ((wifiSsid == null || wifiSsid.length() == 0) ? "''" : wifiSsid) + "  ";
+		str += WIFI_RSSI + "=" + wifiRssi + (wifiRssiFromScanResult ? "*" : "") + "  ";
 		str += WIFI_SPEED + "=" + wifiSpeed + "  ";
 		str += CELLULAR_NETWORK_OPERATOR + "=" + (cellularNetworkOperator.length() == 0 ? "''" : cellularNetworkOperator) + "  ";
 		str += CELLULAR_NETWORK_TYPE + "=" + cellularNetworkType + "  ";

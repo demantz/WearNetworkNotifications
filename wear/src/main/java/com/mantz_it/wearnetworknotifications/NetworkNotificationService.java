@@ -62,7 +62,6 @@ public class NetworkNotificationService extends Service {
 	public static final String ACTION_DISMISS_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_NOTIFICATION";
 	public static final String ACTION_REQUEST_UPDATE = "com.mantz_it.wearnetworknotifications.ACTION_REQUEST_UPDATE";
 	private static final int NOTIFICATION_ID = 1;
-	private static long lastNotificatonTimestamp = 0;
 	private static boolean notificationShowing = false;
 	private static Bitmap largeIcon = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);	// Large background icon for the notification
 	private static Canvas largeIconCanvas = new Canvas(largeIcon);	// Will be used to draw the current icon on the large bitmap
