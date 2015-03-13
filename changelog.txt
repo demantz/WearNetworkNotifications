@@ -1,5 +1,13 @@
 CHANGELOG - Wear Network Notifications
 
+version 1.02
+ - First stable version. Might still contain minor bugs (please report!)
+ - Improving translation
+ - Added some settings
+ - Implemented work-around for a bug in the Android system that would
+   prefent the app from reading out the wifi signal strength in some occasions
+ - Adding 'donate' and 'about' dialogs
+
 version 1.01
  - First released version. Might be unstable.
  - Basic functionality works (untested):

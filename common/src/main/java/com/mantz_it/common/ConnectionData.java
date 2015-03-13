@@ -243,13 +243,12 @@ public class ConnectionData {
 
 	public String getPrimarySignalStrength(int unit) {
 		if(state == STATE_WIFI) {
-			String suffix = wifiRssiFromScanResult ? "*" : "";
 			if(unit == UNIT_PERCENT)
-				return "" + getWifiSignalStrengthPercentage() + suffix;
+				return "" + getWifiSignalStrengthPercentage();
 			else if(unit == UNIT_DBM)
 				return "dBm";		// TODO replace with actual calculation
 			else if(unit == UNIT_RSSI)
-				return "" + wifiRssi + suffix;
+				return "" + wifiRssi;
 		}
 		else {
 			if(cellularAsuLevel <= 0) {
