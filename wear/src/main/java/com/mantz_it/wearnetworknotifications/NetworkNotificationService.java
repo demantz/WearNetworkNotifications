@@ -172,11 +172,11 @@ public class NetworkNotificationService extends Service {
 
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
-		Log.d(LOGTAG, "onStartCommand: " + intent.getAction());
+		Log.d(LOGTAG, "onStartCommand: " + (intent == null ? "intent==null" : intent.getAction()));
 		Bundle data = intent.getBundleExtra(CommonPaths.CONNECTION_DATA);
 
 		// create a notification depending on the received intent
-		if(intent.getAction().equals(ACTION_SHOW_NOTIFICATION)) {
+		if(intent == null || intent.getAction().equals(ACTION_SHOW_NOTIFICATION)) {
 			// nothing special with this one
 		} else if(intent.getAction().equals(ACTION_NOW_OFFLINE)) {
 			connected = false;
