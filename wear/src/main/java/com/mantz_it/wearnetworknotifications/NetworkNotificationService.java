@@ -173,7 +173,9 @@ public class NetworkNotificationService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(LOGTAG, "onStartCommand: " + (intent == null ? "intent==null" : intent.getAction()));
-		Bundle data = intent.getBundleExtra(CommonPaths.CONNECTION_DATA);
+		Bundle data = null;
+		if(intent != null)
+			data = intent.getBundleExtra(CommonPaths.CONNECTION_DATA);
 
 		// create a notification depending on the received intent
 		if(intent == null || intent.getAction().equals(ACTION_SHOW_NOTIFICATION)) {
@@ -277,19 +279,43 @@ public class NetworkNotificationService extends Service {
 		if(title.length() == 0)
 			title = "";
 
+		// Main notification builder
 		final Notification.Builder notificationBuilder = new Notification.Builder(context)
 				.setLargeIcon(largeIcon)
 				.setSmallIcon(iconRes)		// you have to include this
 				.setContentTitle(title)
 				.setContentText(conData.getPrimaryNetworkName())
-				.setPriority(2)
+				.setPriority(Notification.PRIORITY_MAX)
 				.setCategory(Notification.CATEGORY_STATUS);
 		if(vibrate)
 			notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
+
+		// Create a wearable extender for the notification
 		final Notification.WearableExtender wearableExtender = new Notification.WearableExtender()
 				.setContentIcon(iconRes)
 				.setContentIconGravity(signalIndicatorPosition.equals("left") ? Gravity.START : Gravity.END)
 				.setHintHideIcon(true);
+
+		// Create a builder for the cellular details page
+		ConnectionData.MccMncListItem mccMncListItem = conData.lookupMccMnc();
+		String cellularDetails = "MCC:\t" + conData.getCellularMCC() + "(" + (mccMncListItem != null ? mccMncListItem.getCountry() : "-") + ")\nMNC:\t"
+				+ conData.getCellularMNC() + "(" + (mccMncListItem != null ? mccMncListItem.getNetwork() : "-")
+				+ ")\nLAC:\t" + conData.getCellularLAC() + "\nCID:\t" + conData.getCellularCID();
+		final Notification.Builder cellularDetailsPageBuilder = new Notification.Builder(context)
+				.setContentTitle("Mobile Data")
+				.setContentText(cellularDetails);
+
+		// Create a builder for the cellular details page
+		String frequency = conData.getWifiFrequency() > 0 ? "" + ((double)conData.getWifiFrequency() / 1000.0) + " GHz" : "-";
+		String wifiDetails = "BSSID:\t" + conData.getWifiBssid() + "\nFreq.:\t" + frequency
+			+ "\nChannel:\t" + conData.getWifiChannel() + "\nSpeed:\t" + conData.getWifiSpeed() + " MBit/s\nIP:\t" + conData.getWifiIp();
+		final Notification.Builder wifiDetailsPageBuilder = new Notification.Builder(context)
+				.setContentTitle("Wifi Data")
+				.setContentText(wifiDetails);
+
+		// Add pages and extend main notification by the extender
+		wearableExtender.addPage(cellularDetailsPageBuilder.build());
+		wearableExtender.addPage(wifiDetailsPageBuilder.build());
 		notificationBuilder.extend(wearableExtender);
 
 		Intent deleteIntent = new Intent(ACTION_DISMISS_NOTIFICATION);
