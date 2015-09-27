@@ -26,6 +26,7 @@ Implemented Features
 * Notification on transition between WIFI, MOBILE and OFFLINE
 * Customizable behaviour
 * Signal strength indicatior icon and absolute value in %, RSSI/dBm and ASU level
+* [NEW] Aditional details pages showing MCC, MNC, LAC, CID, BSSID, IP, ...
 * Automatic update of the notification when the wearable device wakes up
 * Available languages: English and German
 
