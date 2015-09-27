@@ -240,11 +240,17 @@ public class ConnectionData {
 	}
 
 	public String getWifiBssid() {
-		return wifiBssid.replace("\"", "");
+		if(wifiBssid != null)
+			return wifiBssid.replace("\"", "");
+		else
+			return "";
 	}
 
 	public String getWifiSsid() {
-		return wifiSsid.replace("\"", "");
+		if(wifiSsid != null)
+			return wifiSsid.replace("\"", "");
+		else
+			return "";
 	}
 
 	public int getWifiRssi() {
@@ -700,6 +706,7 @@ public class ConnectionData {
 				return item;
 		}
 
+		Log.d(LOGTAG, "lookupMccMnc(): Couldn't found a match for mcc=" + mcc + " and mnc=" + mnc);
 		return null;
 	}
 

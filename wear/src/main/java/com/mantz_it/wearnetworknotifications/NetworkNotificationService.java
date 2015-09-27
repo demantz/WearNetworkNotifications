@@ -18,6 +18,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
+import android.text.Html;
 import android.util.Log;
 import android.view.Gravity;
 
@@ -298,20 +299,26 @@ public class NetworkNotificationService extends Service {
 
 		// Create a builder for the cellular details page
 		ConnectionData.MccMncListItem mccMncListItem = conData.lookupMccMnc();
-		String cellularDetails = "MCC:\t" + conData.getCellularMCC() + "(" + (mccMncListItem != null ? mccMncListItem.getCountry() : "-") + ")\nMNC:\t"
-				+ conData.getCellularMNC() + "(" + (mccMncListItem != null ? mccMncListItem.getNetwork() : "-")
-				+ ")\nLAC:\t" + conData.getCellularLAC() + "\nCID:\t" + conData.getCellularCID();
+		String cellularDetails = "Network: <b>" + conData.getCellularNetworkOperator()
+				+ "</b><br />MCC: <b>" + conData.getCellularMCC() + "(" + (mccMncListItem != null ? mccMncListItem.getCountry() : "-")
+				+ ")</b><br />MNC: <b>" + conData.getCellularMNC() + "(" + (mccMncListItem != null ? mccMncListItem.getNetwork() : "-")
+				+ ")</b><br />LAC: <b>" + conData.getCellularLAC()
+				+ "</b><br />CID: <b>" + conData.getCellularCID() + "</b>";
 		final Notification.Builder cellularDetailsPageBuilder = new Notification.Builder(context)
 				.setContentTitle("Mobile Data")
-				.setContentText(cellularDetails);
+				.setContentText(Html.fromHtml(cellularDetails));
 
 		// Create a builder for the cellular details page
 		String frequency = conData.getWifiFrequency() > 0 ? "" + ((double)conData.getWifiFrequency() / 1000.0) + " GHz" : "-";
-		String wifiDetails = "BSSID:\t" + conData.getWifiBssid() + "\nFreq.:\t" + frequency
-			+ "\nChannel:\t" + conData.getWifiChannel() + "\nSpeed:\t" + conData.getWifiSpeed() + " MBit/s\nIP:\t" + conData.getWifiIp();
+		String wifiDetails = "SSID: <b>" + conData.getWifiSsid()
+				+ "</b><br />BSSID: <b>" + conData.getWifiBssid()
+				+ "</b><br />Freq.: <b>" + frequency
+				+ "</b><br />Channel: <b>" + conData.getWifiChannel()
+				+ "</b><br />Speed: <b>" + conData.getWifiSpeed()
+				+ " MBit/s</b><br /s>IP: <b>" + conData.getWifiIp() + "</b>";
 		final Notification.Builder wifiDetailsPageBuilder = new Notification.Builder(context)
 				.setContentTitle("Wifi Data")
-				.setContentText(wifiDetails);
+				.setContentText(Html.fromHtml(wifiDetails));
 
 		// Add pages and extend main notification by the extender
 		wearableExtender.addPage(cellularDetailsPageBuilder.build());
