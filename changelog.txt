@@ -1,5 +1,12 @@
 CHANGELOG - Wear Network Notifications
 
+version 1.04
+ - Added Privacy Policy
+
+version 1.03
+ - Bug fixes
+ - Details pages for wifi and mobile data (swipe left on the notification)
+
 version 1.02
  - First stable version. Might still contain minor bugs (please report!)
  - Improving translation

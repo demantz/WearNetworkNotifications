@@ -23,7 +23,7 @@
     <string name="about_title"><![CDATA[<h1>Über die App</h1>]]></string>
     <string name="about_msg_body"><![CDATA[
 Wear Netzwerk Benachrichtigungen %s <br /><br />
-Copyright &#169; 2015 Dennis Mantz<br /><br />
+Copyright &#169; 2017 Dennis Mantz<br /><br />
 Bitte unterstütze meine Arbeit durch eine kleine Spende!
 
 <h1>Bug gefunden?</h1>
@@ -34,6 +34,9 @@ https://github.com/demantz/WearNetworkNotifications/issues</a>
 <br /><br />
 Alternativ kannst du mir auch eine Email schreiben an
 <a href=mailto:dennis.mantz@googlemail.com>dennis.mantz@googlemail.com</a>.
+
+<h1>Privacy Policy</h1>
+<a href=https://raw.githubusercontent.com/demantz/WearNetworkNotifications/master/privacy_policy.md>Privacy Policy anzeigen</a>
 
 <h1>Danke</h1>
 Ich bedanke mich bei Dominik Schürmann für sein

@@ -454,7 +454,7 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 	public String getNetworkInformation() {
 		TelephonyManager tm = (TelephonyManager) getSystemService(TELEPHONY_SERVICE);
 		ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-		WifiManager wm = (WifiManager) getSystemService(Context.WIFI_SERVICE);
+		WifiManager wm = (WifiManager) getApplicationContext().getSystemService(Context.WIFI_SERVICE);
 		StringBuilder stringBuilder = new StringBuilder();
 
 		NetworkInfo[] networkInfos = cm.getAllNetworkInfo();
