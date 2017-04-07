@@ -84,7 +84,7 @@ public class WatchWearableListenerService extends WearableListenerService {
 			// UPDATE CONNECTION DATA
 			else if(dataEvent.getDataItem().getUri().getPath().equals(CommonPaths.CONNECTION_DATA)) {
 				DataMap dataMap = DataMapItem.fromDataItem(dataEvent.getDataItem()).getDataMap();
-				NetworkNotificationService.updateNotification(this, dataMap.toBundle(), false, sharedPreferences);
+				NetworkNotificationService.updateData(this, dataMap.toBundle());
 			} else
 				Log.w(LOGTAG, "onDataChanged: Unknown path: " + dataEvent.getDataItem().getUri().getPath());
 		}

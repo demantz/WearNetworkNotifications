@@ -1,13 +1,13 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.mantz_it.wearnetworknotifications"
         minSdkVersion 18
-        targetSdkVersion 21
+        targetSdkVersion 23
         versionCode 1401
         versionName "1.4beta1"
     }
@@ -23,9 +23,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":common")
-    compile project(":donations")
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':common')
+    compile project(':donations')
     wearApp project(':wear')
-    compile 'com.android.support:appcompat-v7:21.0.3'
+    compile 'com.android.support:appcompat-v7:23.4.0'
 }

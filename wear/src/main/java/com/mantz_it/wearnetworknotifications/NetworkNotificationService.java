@@ -138,6 +138,8 @@ public class NetworkNotificationService extends Service {
 					// Also make sure the Notification is canceled:
 					NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
 					notificationManager.cancel(NOTIFICATION_ID);
+
+					// TODO only stop if no compilation is shown!
 					NetworkNotificationService.this.stopSelf();
 				}
 			}
@@ -186,145 +188,143 @@ public class NetworkNotificationService extends Service {
 		} else if(intent.getAction().equals(ACTION_NOW_ONLINE)) {
 			connected = true;
 		}
-		createNotification(this, data, connected, sharedPreferences);
+
+		// TODO: only when notifications are activated
+		updateNotification(this, data, connected, false, sharedPreferences);
+
+
+		if(data != null) {
+			Log.d(LOGTAG, "onStartCommand: calling updateData() on the ComplicationService...");
+			NetworkComplicationProviderService.updateData(this, data);
+		}
+
+		// Request an update of the network data from the smartphone (only if we are online):
+		if(data == null && connected) {
+			Intent updateIntent = new Intent(ACTION_REQUEST_UPDATE);
+			sendBroadcast(updateIntent);
+		}
 
 		return START_STICKY;
 	}
 
+	public static void updateData(Context context, Bundle data) {
+		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+		Log.d(LOGTAG, "updateData: calling updateData() on the ComplicationService...");
+		NetworkComplicationProviderService.updateData(context, data);
+
+		// TODO only when notifications are activated
+		updateNotification(context, data, true, true, sharedPreferences);
+
+	}
+
 	/**
-	 * Will create and show a notification on the wearable.
+	 * Will show/update the notification with the latest connection data
 	 *
 	 * @param context		application context
-	 * @param data			connection data (may be null; in this case the notification shows 'loading')
+	 * @param data			connection data (must not be null)
 	 * @param connected		true if the handheld node is connected; false if no connection to smartphone
+	 * @param supressVibration true if no vibration should be done (e.g. when there is no significant connectivity change)
 	 * @param preferences	shared preference instance
 	 */
-	public static void createNotification(Context context, Bundle data, boolean connected, SharedPreferences preferences) {
-		boolean vibrate = preferences.getBoolean(context.getString(R.string.pref_vibration), true);
+	private static void updateNotification(Context context, Bundle data, boolean connected, boolean supressVibration, SharedPreferences preferences) {
+		if(!notificationShowing) {
+			Log.d(LOGTAG, "updateNotification: Notification is not visible. Don't update!");
+			return;
+		}
 
-		// if we have data, just call updateNotification() to show the notification:
-		if(data != null)
-			updateNotification(context, data, vibrate, preferences);
-		else {
-			// otherwise we show 'loading' or 'offline':
-			int iconRes = connected ? R.drawable.ic_launcher : R.drawable.offline;
-			String title = connected ? context.getString(R.string.loading) : context.getString(R.string.offline);
-			final Notification.Builder notificationBuilder = new Notification.Builder(context)
-					.setSmallIcon(iconRes)		// you have to include this
-					.setContentTitle(title)
-					.setCategory(Notification.CATEGORY_STATUS);
+		boolean showNetworkName = preferences.getBoolean(context.getString(R.string.pref_showNetworkName), true);
+		boolean showSignalStrength = preferences.getBoolean(context.getString(R.string.pref_showSignalStrength), true);
+		String signalIndicatorPosition = preferences.getString(context.getString(R.string.pref_signalIndicatorPosition), "left");
+		int cellularSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_cellularSignalStrengthUnit), "0"));
+		int wifiSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_wifiSignalStrengthUnit), "0"));
+		boolean vibrate = preferences.getBoolean(context.getString(R.string.pref_vibration), true);
+		int iconRes;
+		String title;
+		final Notification.Builder notificationBuilder = new Notification.Builder(context);
+		if(data == null) {
+			// we show 'loading' or 'offline':
+			iconRes = connected ? R.drawable.ic_launcher : R.drawable.offline;
+			title = connected ? context.getString(R.string.loading) : context.getString(R.string.offline);
+			notificationBuilder.setSmallIcon(iconRes);
+			notificationBuilder.setContentTitle(title);
+			notificationBuilder.setCategory(Notification.CATEGORY_STATUS);
+
 			final Notification.WearableExtender wearableExtender = new Notification.WearableExtender()
 					.setContentIcon(iconRes)
 					.setContentIconGravity(Gravity.END)
 					.setHintHideIcon(true);
 			notificationBuilder.extend(wearableExtender);
 
-			if(vibrate)
-				notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
+		} else {
+			ConnectionData conData = ConnectionData.fromBundle(context, data);
+			Log.d(LOGTAG, "updateNotification: " + conData.toString());
 
-			// Add a dismiss intent to the notification which will be received by the BroadcastReceiver
-			Intent deleteIntent = new Intent(ACTION_DISMISS_NOTIFICATION);
-			PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
-			notificationBuilder.setDeleteIntent(pendingIntent);
+			iconRes = conData.getIndicatorIconRes();
+			if (iconRes < 0)
+				iconRes = R.drawable.ic_launcher;
 
-			NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+			// Prepare the large icon:
+			largeIconCanvas.drawColor(Color.BLACK);
+			Bitmap icon = BitmapFactory.decodeResource(context.getResources(), iconRes);
+			largeIconCanvas.drawBitmap(icon, new Rect(0, 0, icon.getWidth(), icon.getHeight()), new Rect(130, 70, 270, 210), paint);
 
-			// Build the notification and issues it with notification manager.
-			notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
-
-			// Request an update of the network data from the smartphone (only if we are online):
-			if(connected) {
-				Intent intent = new Intent(ACTION_REQUEST_UPDATE);
-				context.sendBroadcast(intent);
-			}
-		}
-	}
-
-	/**
-	 * Will update the notification with the latest connection data
-	 *
-	 * @param context		application context
-	 * @param data			connection data (must not be null)
-	 * @param vibrate		if true, the wearable device will vibrate
-	 * @param preferences	shared preference instance
-	 */
-	public static void updateNotification(Context context, Bundle data, boolean vibrate, SharedPreferences preferences) {
-		if(!notificationShowing) {
-			Log.d(LOGTAG, "updateNotification: Notification is not visible. Don't update!");
-			return;
-		}
-		boolean showNetworkName = preferences.getBoolean(context.getString(R.string.pref_showNetworkName), true);
-		boolean showSignalStrength = preferences.getBoolean(context.getString(R.string.pref_showSignalStrength), true);
-		String signalIndicatorPosition = preferences.getString(context.getString(R.string.pref_signalIndicatorPosition), "left");
-		int cellularSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_cellularSignalStrengthUnit), "0"));
-		int wifiSignalStrengthUnit = Integer.valueOf(preferences.getString(context.getString(R.string.pref_wifiSignalStrengthUnit), "0"));
-
-		ConnectionData conData = ConnectionData.fromBundle(context, data);
-		Log.d(LOGTAG, "updateNotification: " + conData.toString());
-
-		int iconRes = conData.getIndicatorIconRes();
-		if(iconRes < 0)
-			iconRes = R.drawable.ic_launcher;
-
-		// Prepare the large icon:
-		largeIconCanvas.drawColor(Color.BLACK);
-		Bitmap icon = BitmapFactory.decodeResource(context.getResources(), iconRes);
-		largeIconCanvas.drawBitmap(icon, new Rect(0, 0, icon.getWidth(), icon.getHeight()), new Rect(130, 70, 270, 210), paint);
-
-		String title = "";
-		if(showSignalStrength)
-			title += conData.getPrimarySignalStrength(conData.getConnectionState() == ConnectionData.STATE_WIFI ?
-					wifiSignalStrengthUnit : cellularSignalStrengthUnit) + " ";
-		if(showNetworkName)
-			title += conData.getPrimaryNetworkName();
-		if(title.length() == 0)
 			title = "";
+			if (showSignalStrength)
+				title += conData.getPrimarySignalStrength(conData.getConnectionState() == ConnectionData.STATE_WIFI ?
+						wifiSignalStrengthUnit : cellularSignalStrengthUnit) + " ";
+			if (showNetworkName)
+				title += conData.getPrimaryNetworkName();
+			if (title.length() == 0)
+				title = "";
 
-		// Main notification builder
-		final Notification.Builder notificationBuilder = new Notification.Builder(context)
-				.setLargeIcon(largeIcon)
-				.setSmallIcon(iconRes)		// you have to include this
-				.setContentTitle(title)
-				.setContentText(conData.getPrimaryNetworkName())
-				.setPriority(Notification.PRIORITY_MAX)
-				.setCategory(Notification.CATEGORY_STATUS);
-		if(vibrate)
+			// Main notification builder
+            notificationBuilder.setLargeIcon(largeIcon);
+            notificationBuilder.setSmallIcon(iconRes);
+            notificationBuilder.setContentTitle(title);
+            notificationBuilder.setContentText(conData.getPrimaryNetworkName());
+            notificationBuilder.setPriority(Notification.PRIORITY_MAX);
+            notificationBuilder.setCategory(Notification.CATEGORY_STATUS);
+
+			// Create a wearable extender for the notification
+			final Notification.WearableExtender wearableExtender = new Notification.WearableExtender()
+					.setContentIcon(iconRes)
+					.setContentIconGravity(signalIndicatorPosition.equals("left") ? Gravity.START : Gravity.END)
+					.setHintHideIcon(true);
+
+			// Create a builder for the cellular details page
+			ConnectionData.MccMncListItem mccMncListItem = conData.lookupMccMnc();
+			String cellularDetails = "Network: <b>" + conData.getCellularNetworkOperator()
+					+ "</b><br />MCC: <b>" + conData.getCellularMCC() + "(" + (mccMncListItem != null ? mccMncListItem.getCountry() : "-")
+					+ ")</b><br />MNC: <b>" + conData.getCellularMNC() + "(" + (mccMncListItem != null ? mccMncListItem.getNetwork() : "-")
+					+ ")</b><br />LAC: <b>" + conData.getCellularLAC()
+					+ "</b><br />CID: <b>" + conData.getCellularCID() + "</b>";
+			final Notification.Builder cellularDetailsPageBuilder = new Notification.Builder(context)
+					.setContentTitle("Mobile Data")
+					.setContentText(Html.fromHtml(cellularDetails));
+
+			// Create a builder for the cellular details page
+			String frequency = conData.getWifiFrequency() > 0 ? "" + ((double) conData.getWifiFrequency() / 1000.0) + " GHz" : "-";
+			String wifiDetails = "SSID: <b>" + conData.getWifiSsid()
+					+ "</b><br />BSSID: <b>" + conData.getWifiBssid()
+					+ "</b><br />Freq.: <b>" + frequency
+					+ "</b><br />Channel: <b>" + conData.getWifiChannel()
+					+ "</b><br />Speed: <b>" + conData.getWifiSpeed()
+					+ " MBit/s</b><br /s>IP: <b>" + conData.getWifiIp() + "</b>";
+			final Notification.Builder wifiDetailsPageBuilder = new Notification.Builder(context)
+					.setContentTitle("Wifi Data")
+					.setContentText(Html.fromHtml(wifiDetails));
+
+			// Add pages and extend main notification by the extender
+			wearableExtender.addPage(cellularDetailsPageBuilder.build());
+			wearableExtender.addPage(wifiDetailsPageBuilder.build());
+			notificationBuilder.extend(wearableExtender);
+		}
+
+		if(vibrate && !supressVibration)
 			notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
 
-		// Create a wearable extender for the notification
-		final Notification.WearableExtender wearableExtender = new Notification.WearableExtender()
-				.setContentIcon(iconRes)
-				.setContentIconGravity(signalIndicatorPosition.equals("left") ? Gravity.START : Gravity.END)
-				.setHintHideIcon(true);
-
-		// Create a builder for the cellular details page
-		ConnectionData.MccMncListItem mccMncListItem = conData.lookupMccMnc();
-		String cellularDetails = "Network: <b>" + conData.getCellularNetworkOperator()
-				+ "</b><br />MCC: <b>" + conData.getCellularMCC() + "(" + (mccMncListItem != null ? mccMncListItem.getCountry() : "-")
-				+ ")</b><br />MNC: <b>" + conData.getCellularMNC() + "(" + (mccMncListItem != null ? mccMncListItem.getNetwork() : "-")
-				+ ")</b><br />LAC: <b>" + conData.getCellularLAC()
-				+ "</b><br />CID: <b>" + conData.getCellularCID() + "</b>";
-		final Notification.Builder cellularDetailsPageBuilder = new Notification.Builder(context)
-				.setContentTitle("Mobile Data")
-				.setContentText(Html.fromHtml(cellularDetails));
-
-		// Create a builder for the cellular details page
-		String frequency = conData.getWifiFrequency() > 0 ? "" + ((double)conData.getWifiFrequency() / 1000.0) + " GHz" : "-";
-		String wifiDetails = "SSID: <b>" + conData.getWifiSsid()
-				+ "</b><br />BSSID: <b>" + conData.getWifiBssid()
-				+ "</b><br />Freq.: <b>" + frequency
-				+ "</b><br />Channel: <b>" + conData.getWifiChannel()
-				+ "</b><br />Speed: <b>" + conData.getWifiSpeed()
-				+ " MBit/s</b><br /s>IP: <b>" + conData.getWifiIp() + "</b>";
-		final Notification.Builder wifiDetailsPageBuilder = new Notification.Builder(context)
-				.setContentTitle("Wifi Data")
-				.setContentText(Html.fromHtml(wifiDetails));
-
-		// Add pages and extend main notification by the extender
-		wearableExtender.addPage(cellularDetailsPageBuilder.build());
-		wearableExtender.addPage(wifiDetailsPageBuilder.build());
-		notificationBuilder.extend(wearableExtender);
-
+		// Add a dismiss intent to the notification which will be received by the BroadcastReceiver
 		Intent deleteIntent = new Intent(ACTION_DISMISS_NOTIFICATION);
 		PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, deleteIntent, 0);
 		notificationBuilder.setDeleteIntent(pendingIntent);
@@ -333,5 +333,6 @@ public class NetworkNotificationService extends Service {
 
 		// Build the notification and issues it with notification manager.
 		notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
+
 	}
 }

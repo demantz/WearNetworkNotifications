@@ -2,15 +2,16 @@ apply plugin: 'com.android.application'
 
 
 android {
-    compileSdkVersion 21
+    compileSdkVersion 23
     buildToolsVersion '25.0.0'
 
     defaultConfig {
         applicationId "com.mantz_it.wearnetworknotifications"
-        minSdkVersion 21
-        targetSdkVersion 21
+        minSdkVersion 23
+        targetSdkVersion 23
         versionCode 1401
         versionName "1.4beta1"
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -24,7 +25,9 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(":common")
-    compile 'com.google.android.support:wearable:1.1.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile project(':common')
+    compile 'com.google.android.support:wearable:2.0.1'
+    compile 'com.google.android.gms:play-services-wearable:10.2.1'
+    provided 'com.google.android.wearable:wearable:1.0.0'
 }
