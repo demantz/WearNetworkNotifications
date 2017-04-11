@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string-array name="pref_autoDismissNotification_entries">
+        <item>deaktiviert</item>
+        <item>5 sec</item>
+        <item>10 sec</item>
+        <item>15 sec</item>
+        <item>30 sec</item>
+        <item>1 min</item>
+        <item>2 min</item>
+        <item>5 min</item>
+        <item>10 min</item>
+    </string-array>
     <string-array name="pref_signalIndicatorPosition_entries">
         <item>links</item>
         <item>rechts</item>

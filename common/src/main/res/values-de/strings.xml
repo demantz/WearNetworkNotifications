@@ -7,6 +7,10 @@
     <string name="pref_showNotifications_title">Zeige Benachrichtigungen</string>
     <string name="pref_vibration_summ_off">Vibration ist deaktiviert</string>
     <string name="pref_vibration_summ_on">Vibrieren bei jeder Benachrichtigung</string>
+    <string name="pref_autoDismissNotification_title">Benachrichtigung automatisch entfernen</string>
+    <string name="pref_autoDismissNotification_default">0</string>
+    <string name="pref_autoDismissNotification_summ_off">Benachritigungen werden nicht automatisch entfernt</string>
+    <string name="pref_autoDismissNotification_summ">Benachrichtigung nach %s Sekunden entfernen</string>
     <string name="pref_vibration_title">Vibration</string>
     <string name="pref_cellularOffline_summ_off">Keine Benachrichtigung beim Wechsel von Mobilfunk nach Offline</string>
     <string name="pref_cellularOffline_summ_on">Benachrichtigen beim Wechsel von Mobilfunk nach Offline</string>

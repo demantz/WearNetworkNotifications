@@ -113,6 +113,9 @@ public class WearableApiHelper {
 		key = context.getString(R.string.pref_vibration);
 		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
 
+		key = context.getString(R.string.pref_autoDismissNotification);
+		dataMap.putString(key, sharedPreferences.getString(key, context.getString(R.string.pref_autoDismissNotification_default)));
+
 		key = context.getString(R.string.pref_wearableOffline);
 		dataMap.putBoolean(key, sharedPreferences.getBoolean(key, true));
 
@@ -153,6 +156,9 @@ public class WearableApiHelper {
 
 		key = context.getString(R.string.pref_vibration);
 		edit.putBoolean(key, data.getBoolean(key));
+
+		key = context.getString(R.string.pref_autoDismissNotification);
+		edit.putString(key, data.getString(key));
 
 		key = context.getString(R.string.pref_wearableOffline);
 		edit.putBoolean(key, data.getBoolean(key));

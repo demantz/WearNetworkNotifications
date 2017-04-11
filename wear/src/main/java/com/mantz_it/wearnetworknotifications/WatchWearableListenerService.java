@@ -149,27 +149,19 @@ public class WatchWearableListenerService extends WearableListenerService {
 	public void onPeerConnected(Node peer) {
 		Log.d(LOGTAG, "onPeerConnected");
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		if(preferences.getBoolean(getString(R.string.pref_wearableOnline), true)
-				&& preferences.getBoolean(getString(R.string.pref_showNotifications), true)) {
-
-			// show a notification:
-			Intent intent = new Intent(this, NetworkNotificationService.class);
-			intent.setAction(NetworkNotificationService.ACTION_NOW_ONLINE);
-			startService(intent);
-		}
+        // pass the info to the Notification Service
+        Intent intent = new Intent(this, NetworkNotificationService.class);
+        intent.setAction(NetworkNotificationService.ACTION_NOW_ONLINE);
+        startService(intent);
 	}
 
 	@Override
 	public void onPeerDisconnected(Node peer) {
 		Log.d(LOGTAG, "onPeerDisconnected");
 		SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(this);
-		if(preferences.getBoolean(getString(R.string.pref_wearableOffline), true)
-				&& preferences.getBoolean(getString(R.string.pref_showNotifications), true)) {
-
-			// show a notification:
-			Intent intent = new Intent(this, NetworkNotificationService.class);
-			intent.setAction(NetworkNotificationService.ACTION_NOW_OFFLINE);
-			startService(intent);
-		}
+        // pass the info to the Notification Service
+        Intent intent = new Intent(this, NetworkNotificationService.class);
+        intent.setAction(NetworkNotificationService.ACTION_NOW_OFFLINE);
+        startService(intent);
 	}
 }

@@ -12,6 +12,11 @@
     <string name="pref_vibration_title">Vibration</string>
     <string name="pref_vibration_summ_on">The watch vibrates with each notification</string>
     <string name="pref_vibration_summ_off">Vibration is turned off</string>
+    <string name="pref_autoDismissNotification">pref_autoDismissNotification</string>
+    <string name="pref_autoDismissNotification_title">Auto-Dismiss Notification</string>
+    <string name="pref_autoDismissNotification_default">0</string>
+    <string name="pref_autoDismissNotification_summ_off">Auto-Dismiss is disabled</string>
+    <string name="pref_autoDismissNotification_summ">Auto-Dismiss after %s seconds</string>
     <string name="pref_wifiOffline" translatable="false">pref_wifiOffline</string>
     <string name="pref_wifiOffline_title">WIFI --> OFFLINE</string>
     <string name="pref_wifiOffline_summ_on">Notify if state changes from wifi to offline</string>

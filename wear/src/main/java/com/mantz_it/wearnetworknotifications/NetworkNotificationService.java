@@ -17,6 +17,7 @@ import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.text.Html;
 import android.util.Log;
@@ -58,12 +59,16 @@ import com.mantz_it.common.WearableApiHelper;
 public class NetworkNotificationService extends Service {
 	private static final String LOGTAG = "NetworkNotificationS";
 	public static final String ACTION_SHOW_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_NOTIFICATION";
+	public static final String ACTION_SHOW_COMPILATION = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_COMPILATION";
 	public static final String ACTION_NOW_ONLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_ONLINE";
 	public static final String ACTION_NOW_OFFLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_OFFLINE";
 	public static final String ACTION_DISMISS_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_NOTIFICATION";
+	public static final String ACTION_DISMISS_COMPILATION = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_COMPILATION";
 	public static final String ACTION_REQUEST_UPDATE = "com.mantz_it.wearnetworknotifications.ACTION_REQUEST_UPDATE";
 	private static final int NOTIFICATION_ID = 1;
 	private static boolean notificationShowing = false;
+	private static boolean compilationShowing = false;
+	private static long notificationShowTime = 0;
 	private static Bitmap largeIcon = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);	// Large background icon for the notification
 	private static Canvas largeIconCanvas = new Canvas(largeIcon);	// Will be used to draw the current icon on the large bitmap
 	private static Paint paint = new Paint();						// Will be used to draw the current icon on the large bitmap
@@ -86,6 +91,18 @@ public class NetworkNotificationService extends Service {
 				if(intent.getAction().equals("android.intent.action.SCREEN_ON")
 						|| intent.getAction().equals("android.intent.action.DREAMING_STOPPED")
 						|| intent.getAction().equals(ACTION_REQUEST_UPDATE)) {
+
+					// First check if there is a notification showing, which should be auto-dismissed:
+					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: debug: autodismiss=" + sharedPreferences.getString(getString(R.string.pref_autoDismissNotification), "0"));
+					if(notificationShowing && Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_autoDismissNotification), "0")) > 0) {
+						if(System.currentTimeMillis() - notificationShowTime > Integer.valueOf(sharedPreferences.getString(getString(R.string.pref_autoDismissNotification), "0")) * 1000) {
+							Log.i(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Auto-dismiss notification!");
+							Intent dismissIntent = new Intent(ACTION_DISMISS_NOTIFICATION);
+							sendBroadcast(dismissIntent);
+							if(!compilationShowing)
+								return;
+						}
+					}
 
 					// check if we sent an update request less than five seconds ago:
 					long currentTime = System.currentTimeMillis();
@@ -134,13 +151,27 @@ public class NetworkNotificationService extends Service {
 						}
 					}.start();
 				} else if(intent.getAction().equals(ACTION_DISMISS_NOTIFICATION)) {
-					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_NOTIFICATION action. Stop NetworkNotification service");
+					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_NOTIFICATION action.");
+					// make sure the Notification is canceled:
+					NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
+					notificationManager.cancel(NOTIFICATION_ID);
+
+					// from this point on we are in state 'notification dismissed' and will not allow updates to be shown.
+					notificationShowing = false;
+
+                    if(!notificationShowing && !compilationShowing)
+                        NetworkNotificationService.this.stopSelf();
+				} else if(intent.getAction().equals(ACTION_DISMISS_COMPILATION)) {
+					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_COMPILATION action. Stop NetworkNotification service");
 					// Also make sure the Notification is canceled:
 					NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
 					notificationManager.cancel(NOTIFICATION_ID);
 
-					// TODO only stop if no compilation is shown!
-					NetworkNotificationService.this.stopSelf();
+					// from this point on we are in state 'compilation dismissed' and will not allow updates to be shown.
+					compilationShowing = false;
+
+					if(!notificationShowing && !compilationShowing)
+						NetworkNotificationService.this.stopSelf();
 				}
 			}
 		};
@@ -151,10 +182,8 @@ public class NetworkNotificationService extends Service {
 		intentFilter.addAction(Intent.ACTION_DREAMING_STOPPED);
 		intentFilter.addAction(ACTION_REQUEST_UPDATE);
 		intentFilter.addAction(ACTION_DISMISS_NOTIFICATION);
+		intentFilter.addAction(ACTION_DISMISS_COMPILATION);
 		registerReceiver(wakeUpBroadcastReceiver, intentFilter);
-
-		// from this point on we are in state 'notification showing' and will allow updates for notifications
-		notificationShowing = true;
 	}
 
 	@Override
@@ -163,9 +192,6 @@ public class NetworkNotificationService extends Service {
 		Log.d(LOGTAG, "onDestroy");
 		// unregister the receiver
 		unregisterReceiver(wakeUpBroadcastReceiver);
-
-		// from this point on we are in state 'notification dismissed' and will not allow updates to be shown.
-		notificationShowing = false;
 	}
 
 	@Override
@@ -187,16 +213,22 @@ public class NetworkNotificationService extends Service {
 			connected = false;
 		} else if(intent.getAction().equals(ACTION_NOW_ONLINE)) {
 			connected = true;
+		} else if(intent.getAction().equals(ACTION_SHOW_COMPILATION)) {
+			compilationShowing = true;
 		}
 
-		// TODO: only when notifications are activated
-		updateNotification(this, data, connected, false, sharedPreferences);
+		// show notification if enabled
+		if(sharedPreferences.getBoolean(getString(R.string.pref_showNotifications), true) && intent != null) {
+            if(    (intent.getAction().equals(ACTION_NOW_ONLINE) && sharedPreferences.getBoolean(getString(R.string.pref_wearableOnline), true))
+            	|| (intent.getAction().equals(ACTION_NOW_OFFLINE) && sharedPreferences.getBoolean(getString(R.string.pref_wearableOffline), true))
+				|| intent.getAction().equals(ACTION_SHOW_NOTIFICATION)) {
 
+				updateNotification(this, data, connected, false, sharedPreferences);
+            }
+        }
 
-		if(data != null) {
-			Log.d(LOGTAG, "onStartCommand: calling updateData() on the ComplicationService...");
-			NetworkComplicationProviderService.updateData(this, data);
-		}
+        Log.d(LOGTAG, "onStartCommand: calling updateData() on the ComplicationService...");
+        NetworkComplicationProviderService.updateData(this, data, connected);
 
 		// Request an update of the network data from the smartphone (only if we are online):
 		if(data == null && connected) {
@@ -211,11 +243,10 @@ public class NetworkNotificationService extends Service {
 		SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
 		Log.d(LOGTAG, "updateData: calling updateData() on the ComplicationService...");
-		NetworkComplicationProviderService.updateData(context, data);
+		NetworkComplicationProviderService.updateData(context, data, true);
 
-		// TODO only when notifications are activated
-		updateNotification(context, data, true, true, sharedPreferences);
-
+		if(notificationShowing)
+			updateNotification(context, data, true, true, sharedPreferences);
 	}
 
 	/**
@@ -224,15 +255,10 @@ public class NetworkNotificationService extends Service {
 	 * @param context		application context
 	 * @param data			connection data (must not be null)
 	 * @param connected		true if the handheld node is connected; false if no connection to smartphone
-	 * @param supressVibration true if no vibration should be done (e.g. when there is no significant connectivity change)
+	 * @param suppressVibration true if no vibration should be done (e.g. when there is no significant connectivity change)
 	 * @param preferences	shared preference instance
 	 */
-	private static void updateNotification(Context context, Bundle data, boolean connected, boolean supressVibration, SharedPreferences preferences) {
-		if(!notificationShowing) {
-			Log.d(LOGTAG, "updateNotification: Notification is not visible. Don't update!");
-			return;
-		}
-
+	private static void updateNotification(Context context, Bundle data, boolean connected, boolean suppressVibration, SharedPreferences preferences) {
 		boolean showNetworkName = preferences.getBoolean(context.getString(R.string.pref_showNetworkName), true);
 		boolean showSignalStrength = preferences.getBoolean(context.getString(R.string.pref_showSignalStrength), true);
 		String signalIndicatorPosition = preferences.getString(context.getString(R.string.pref_signalIndicatorPosition), "left");
@@ -321,7 +347,7 @@ public class NetworkNotificationService extends Service {
 			notificationBuilder.extend(wearableExtender);
 		}
 
-		if(vibrate && !supressVibration)
+		if(vibrate && !suppressVibration)
 			notificationBuilder.setVibrate(new long[] {0, 50, 100, 50, 100});
 
 		// Add a dismiss intent to the notification which will be received by the BroadcastReceiver
@@ -334,5 +360,9 @@ public class NetworkNotificationService extends Service {
 		// Build the notification and issues it with notification manager.
 		notificationManager.notify(NOTIFICATION_ID, notificationBuilder.build());
 
+		// from this point on we are in state 'notification showing' and will allow updates for notifications
+		if(!notificationShowing)
+			notificationShowTime = System.currentTimeMillis();
+		notificationShowing = true;
 	}
 }

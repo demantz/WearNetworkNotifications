@@ -16,6 +16,14 @@
             android:summaryOn="@string/pref_vibration_summ_on"
             android:summaryOff="@string/pref_vibration_summ_off"
             android:defaultValue="true"/>
+        <ListPreference
+            android:dependency="@string/pref_showNotifications"
+            android:key="@string/pref_autoDismissNotification"
+            android:title="@string/pref_autoDismissNotification_title"
+            android:entries="@array/pref_autoDismissNotification_entries"
+            android:entryValues="@array/pref_autoDismissNotification_values"
+            android:summary="@string/pref_autoDismissNotification_summ_off"
+            android:defaultValue="@string/pref_autoDismissNotification_default"/>
         <CheckBoxPreference
             android:dependency="@string/pref_showNotifications"
             android:key="@string/pref_wifiOffline"
