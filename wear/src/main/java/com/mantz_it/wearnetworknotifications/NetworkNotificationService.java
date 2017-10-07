@@ -60,14 +60,17 @@ public class NetworkNotificationService extends Service {
 	private static final String LOGTAG = "NetworkNotificationS";
 	public static final String ACTION_SHOW_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_NOTIFICATION";
 	public static final String ACTION_SHOW_COMPILATION = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_COMPILATION";
+	public static final String ACTION_SHOW_APP = "com.mantz_it.wearnetworknotifications.ACTION_SHOW_APP";
 	public static final String ACTION_NOW_ONLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_ONLINE";
 	public static final String ACTION_NOW_OFFLINE = "com.mantz_it.wearnetworknotifications.ACTION_NOW_OFFLINE";
 	public static final String ACTION_DISMISS_NOTIFICATION = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_NOTIFICATION";
 	public static final String ACTION_DISMISS_COMPILATION = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_COMPILATION";
+	public static final String ACTION_DISMISS_APP = "com.mantz_it.wearnetworknotifications.ACTION_DISMISS_APP";
 	public static final String ACTION_REQUEST_UPDATE = "com.mantz_it.wearnetworknotifications.ACTION_REQUEST_UPDATE";
 	private static final int NOTIFICATION_ID = 1;
 	private static boolean notificationShowing = false;
 	private static boolean compilationShowing = false;
+	private static boolean appShowing = false;
 	private static long notificationShowTime = 0;
 	private static Bitmap largeIcon = Bitmap.createBitmap(400, 400, Bitmap.Config.ARGB_8888);	// Large background icon for the notification
 	private static Canvas largeIconCanvas = new Canvas(largeIcon);	// Will be used to draw the current icon on the large bitmap
@@ -159,18 +162,23 @@ public class NetworkNotificationService extends Service {
 					// from this point on we are in state 'notification dismissed' and will not allow updates to be shown.
 					notificationShowing = false;
 
-                    if(!notificationShowing && !compilationShowing)
+                    if(!notificationShowing && !compilationShowing && !appShowing)
                         NetworkNotificationService.this.stopSelf();
 				} else if(intent.getAction().equals(ACTION_DISMISS_COMPILATION)) {
-					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_COMPILATION action. Stop NetworkNotification service");
-					// Also make sure the Notification is canceled:
-					NotificationManager notificationManager = (NotificationManager) context.getSystemService(NOTIFICATION_SERVICE);
-					notificationManager.cancel(NOTIFICATION_ID);
+					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_COMPILATION action.");
 
 					// from this point on we are in state 'compilation dismissed' and will not allow updates to be shown.
 					compilationShowing = false;
 
-					if(!notificationShowing && !compilationShowing)
+					if(!notificationShowing && !compilationShowing && !appShowing)
+						NetworkNotificationService.this.stopSelf();
+				} else if(intent.getAction().equals(ACTION_DISMISS_APP)) {
+					Log.d(LOGTAG, "wakeUpBroadcastReceiver.onReceive: Received DISMISS_APP action.");
+
+					// from this point on we are in state 'app not showing' and will not allow updates to be shown.
+					appShowing = false;
+
+					if(!notificationShowing && !compilationShowing && !appShowing)
 						NetworkNotificationService.this.stopSelf();
 				}
 			}
@@ -183,6 +191,7 @@ public class NetworkNotificationService extends Service {
 		intentFilter.addAction(ACTION_REQUEST_UPDATE);
 		intentFilter.addAction(ACTION_DISMISS_NOTIFICATION);
 		intentFilter.addAction(ACTION_DISMISS_COMPILATION);
+		intentFilter.addAction(ACTION_DISMISS_APP);
 		registerReceiver(wakeUpBroadcastReceiver, intentFilter);
 	}
 
@@ -215,6 +224,8 @@ public class NetworkNotificationService extends Service {
 			connected = true;
 		} else if(intent.getAction().equals(ACTION_SHOW_COMPILATION)) {
 			compilationShowing = true;
+		} else if(intent.getAction().equals(ACTION_SHOW_APP)) {
+			appShowing = true;
 		}
 
 		// show notification if enabled
@@ -236,6 +247,11 @@ public class NetworkNotificationService extends Service {
 			sendBroadcast(updateIntent);
 		}
 
+		// Put the new data into the store:
+		if(data != null) {
+			NetworkDataStore.getInstance().insertData(ConnectionData.fromBundle(this, data));
+		}
+
 		return START_STICKY;
 	}
 
@@ -247,6 +263,9 @@ public class NetworkNotificationService extends Service {
 
 		if(notificationShowing)
 			updateNotification(context, data, true, true, sharedPreferences);
+
+		// Put the new data into the store:
+        NetworkDataStore.getInstance().insertData(ConnectionData.fromBundle(context, data));
 	}
 
 	/**

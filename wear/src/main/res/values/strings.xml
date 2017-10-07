@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">WearNetworkNotifications</string>
     <string name="app_label">Network Notifications</string>
+    <string name="title_activity_main">MainActivity</string>
+    <string name="hello_world">Hello World!</string>
 </resources>

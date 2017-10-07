@@ -3,14 +3,14 @@ apply plugin: 'com.android.application'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.1'
 
     defaultConfig {
         applicationId "com.mantz_it.wearnetworknotifications"
         minSdkVersion 23
         targetSdkVersion 23
-        versionCode 1401
-        versionName "1.4beta1"
+        versionCode 1402
+        versionName "1.4beta2"
         multiDexEnabled true
     }
     buildTypes {
@@ -21,6 +21,9 @@ android {
                 disable 'MissingTranslation'
             }
         }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 

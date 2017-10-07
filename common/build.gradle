@@ -2,13 +2,13 @@ apply plugin: 'com.android.library'
 
 android {
     compileSdkVersion 23
-    buildToolsVersion '25.0.0'
+    buildToolsVersion '26.0.1'
 
     defaultConfig {
         minSdkVersion 18
         targetSdkVersion 23
-        versionCode 1401
-        versionName "1.4beta1"
+        versionCode 1402
+        versionName "1.4beta2"
     }
     buildTypes {
         release {
@@ -18,6 +18,9 @@ android {
                 disable 'MissingTranslation'
             }
         }
+    }
+    dexOptions {
+        javaMaxHeapSize "4g"
     }
 }
 
