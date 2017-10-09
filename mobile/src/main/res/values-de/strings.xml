@@ -2,7 +2,6 @@
 <resources>
 
 
-    <string name="action_donate">Spenden</string>
     <string name="action_showHandheldLog">Zeige Log des Telefons</string>
     <string name="action_showWearableLog">Zeige Log der Uhr</string>
     <string name="googleApiClient_not_connected">Der Google API Client ist nicht verbunden!</string>
@@ -18,7 +17,6 @@
     <string name="action_sendTestNotification">Sende Testbenachrichtigung</string>
     <string name="action_showNetworkInformation">Zeige Netzwerkinformationen</string>
     <string name="ok">Ok</string>
-    <string name="donate">Spenden</string>
     <string name="action_about">Über</string>
     <string name="about_title"><![CDATA[<h1>Über die App</h1>]]></string>
     <string name="about_msg_body"><![CDATA[

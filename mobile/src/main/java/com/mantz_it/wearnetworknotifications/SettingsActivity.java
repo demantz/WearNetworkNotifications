@@ -1,6 +1,5 @@
 package com.mantz_it.wearnetworknotifications;
 
-import android.*;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
@@ -190,14 +189,6 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 			return true;
 		} else if (id == R.id.action_sendTestNotification) {
 			sendTestNotification();
-			return true;
-		} else if (id == R.id.action_donate) {
-//			// open in browser:
-//			String donationUrl = "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=W5ZPV42ZFJV3G";
-//			Intent i = new Intent(Intent.ACTION_VIEW);
-//			i.setData(Uri.parse(donationUrl));
-//			startActivity(i);
-			startActivity(new Intent(this, DonationActivity.class));
 			return true;
 		} else if (id == R.id.action_about) {
 			showAboutDialog();
