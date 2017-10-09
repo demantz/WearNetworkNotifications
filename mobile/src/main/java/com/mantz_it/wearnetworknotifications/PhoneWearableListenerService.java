@@ -1,7 +1,11 @@
 package com.mantz_it.wearnetworknotifications;
 
+import android.*;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.preference.PreferenceManager;
+import android.support.v4.content.ContextCompat;
 import android.util.Log;
 
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -47,6 +51,24 @@ public class PhoneWearableListenerService extends WearableListenerService {
 	public void onCreate() {
 		super.onCreate();
 		Log.d(LOGTAG, "onCreate");
+
+		boolean startActivity = false;
+		if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			Log.w(LOGTAG, "onCreate: Permission ACCESS_COARSE_LOCATION not granted!");
+			startActivity = true;
+		} else {
+			Log.d(LOGTAG, "onCreate: Permission ACCESS_COARSE_LOCATION granted!");
+		}
+		if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+			Log.w(LOGTAG, "onCreate: Permission READ_PHONE_STATE not granted!");
+			startActivity = true;
+		} else {
+			Log.d(LOGTAG, "onCreate: Permission READ_PHONE_STATE granted!");
+		}
+		if(startActivity) {
+			Intent intent = new Intent(this, SettingsActivity.class);
+			this.startActivity(intent);
+		}
 	}
 
 	@Override

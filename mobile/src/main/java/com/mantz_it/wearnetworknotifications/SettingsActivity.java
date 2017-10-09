@@ -1,5 +1,6 @@
 package com.mantz_it.wearnetworknotifications;
 
+import android.*;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.FragmentManager;
@@ -18,6 +19,8 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.preference.PreferenceManager;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -83,6 +86,8 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 		GoogleApiClient.OnConnectionFailedListener, MessageApi.MessageListener, NodeApi.NodeListener,
 		SharedPreferences.OnSharedPreferenceChangeListener {
 	private static final String LOGTAG = "SettingsActivity";
+	private static final int COARSE_LOCATION_PERMISSION_REQ = 100;
+	private static final int READ_PHONE_STATE_PERMISSION_REQ = 101;
 	private GoogleApiClient googleApiClient;
 	private Node wearableNode;
 	private ProgressDialog progressDialog;
@@ -125,6 +130,21 @@ public class SettingsActivity extends Activity implements GoogleApiClient.Connec
 
 		// connect the google api client
 		googleApiClient.connect();
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		// Check if permissions are granted:
+		if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+			Log.d(LOGTAG, "onResume: Request permission ACCESS_COARSE_LOCATION...");
+			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_COARSE_LOCATION}, COARSE_LOCATION_PERMISSION_REQ);
+		}
+		if(ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+			Log.w(LOGTAG, "onResume: Request permission READ_PHONE_STATE...");
+			ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.READ_PHONE_STATE}, READ_PHONE_STATE_PERMISSION_REQ);
+		}
 	}
 
 	@Override

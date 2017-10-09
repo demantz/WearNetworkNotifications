@@ -9,8 +9,8 @@ android {
         applicationId "com.mantz_it.wearnetworknotifications"
         minSdkVersion 23
         targetSdkVersion 23
-        versionCode 1402
-        versionName "1.4beta2"
+        versionCode 1403
+        versionName "1.4beta3"
         multiDexEnabled true
     }
     buildTypes {
