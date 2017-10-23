@@ -2,7 +2,9 @@ CHANGELOG - Wear Network Notifications
 
 version 1.04
  - Support for Android Wear 2.0
+ - Connectivity graph (beta)
  - Added Privacy Policy
+ - Removing donation feature
 
 version 1.03
  - Bug fixes
